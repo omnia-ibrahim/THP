@@ -1,0 +1,142 @@
+SEO : http://moz.com/blog/the-web-developers-seo-cheat-sheet-2013-edition
+
+Useful modules to consider:
+
+- https://drupal.org/project/migrate_cakephp (cakephp passwords)
+
+- https://drupal.org/project/imce_plupload (for multiple upload)
+
+- https://drupal.org/project/image_resize_filter
+
+- https://drupal.org/project/plupload (for multiple upload)
+
+- https://drupal.org/project/ocupload (for multiple upload)
+
+- To be checked after a while https://drupal.org/project/media_gallery (multiple upload and dragging to arrange)
+
+
+- https://drupal.org/project/media
+
+- https://drupal.org/project/cloud_zoom
+
+- https://drupal.org/project/multiple_selects
+
+- https://drupal.org/project/metatags_quick (check it for SEO)
+
+- https://drupal.org/project/microdata (microdata module for schema.org)
+
+- https://drupal.org/project/ip2country
+
+- https://drupal.org/project/term_merge (for merging tags)
+
+- https://drupal.org/project/hierarchical_select
+
+ - https://drupal.org/project/starrating
+
+
+For responsive: 
+
+  http://mobile.smashingmagazine.com/2013/04/03/build-fast-loading-mobile-website/
+
+  https://drupal.org/project/ais
+
+
+  - https://drupal.org/project/adaptive_image
+
+  - https://drupal.org/project/ais
+
+  - https://drupal.org/project/fences
+
+  - https://drupal.org/project/windowsize (to tell the current screen size)
+
+  - https://drupal.org/project/tinynav (to resize menu)
+
+  - https://drupal.org/project/select_or_other
+
+
+For ecommerce: (https://drupal.org/node/1593380)
+
+  - https://drupal.org/project/uc_field_attribute (not needed)
+
+  - https://drupal.org/project/regcode
+
+  - https://drupal.org/project/uc_recurring (needed if paid in installation)
+
+  - https://drupal.org/project/uc_who_bought_what
+
+  - https://drupal.org/project/currency
+
+  - https://drupal.org/project/currency_converter
+
+  - https://drupal.org/project/uc_coupon
+
+  - https://drupal.org/project/uc_earlybird
+
+  - https://drupal.org/project/uc_price_per_role (we can use it for premium membership, so we will assign a role for each type and a price after the discount, drawbacks that he will not see the old price)
+
+  - https://drupal.org/project/uc_wishlist 
+
+  - https://drupal.org/project/uc_out_of_stock
+
+  - https://drupal.org/project/uc_views
+
+  - https://drupal.org/project/uc_product_actions
+
+  - https://drupal.org/project/ubercart_marketplace
+
+  - https://drupal.org/project/uc_termsofservice
+
+  - https://drupal.org/project/uc_discounts_alt
+
+  - https://drupal.org/project/uc_product_actions
+
+Doubleclick: https://drupal.org/project/dfp
+http://www.labnol.org/internet/google-dfp-tutorial/
+
+
+Check this : http://www.ubercart.org/node/1366
+
+To be checked: https://drupal.org/project/fences ( For HTML markup)
+
+
+popupppppppp: http://dimsemenov.com/plugins/magnific-popup
+
+
+
+
+=======================================
+
+To be read:
+
+http://www.mightybytes.com/blog/entry/sustainable-web-design-images-responsive-design/
+
+http://www.webdesignerdepot.com/2013/08/how-to-speed-up-responsive-websites/
+
+
+http://mobile.smashingmagazine.com/2013/09/16/responsive-images-performance-problem-case-study/
+
+
+
+
+dfp for responsive tutorials: https://support.google.com/dfp_sb/answer/3423562?hl=en
+
+ssl sites from rackspace:
+
+http://www.digicert.com/
+
+http://www.verisign.com/
+
+http://www.thawte.com/ssl/index.html?tid=a_box_buyssl
+
+https://github.com/humanmade/Colors-Of-Image (color picker)
+
+
+
+To be checked: engblog.polyvore.com
+
+
+
+https://drupal.org/project/project_module/index
+
+
+to validate/test rich pins on pinterest: http://developers.pinterest.com/rich_pins/validator/

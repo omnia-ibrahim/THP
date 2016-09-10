@@ -1,0 +1,293 @@
+<?php
+/**
+ * hook_menu
+ */
+function thehomepage_menu() {
+
+  $items['bookmarklet'] = array(
+    'title' => 'Bookmarklet',
+    'page callback' => 'thehomepage_bookmarklet_page',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['bookmarklet_url'] = array(
+    'title' => 'Bookmarklet Action',
+    'page callback' => 'thehomepage_bookmarklet_action',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implement hook_form_alter
+ */
+function thehomepage_form_alter(&$form, $form_state, $form_id) {
+
+   if ($form_id == 'node_gallery_item_node_form') {
+
+//     $form['#theme'][] = 'thehomepage_designs_theme';
+
+   }
+}
+
+/**
+ *
+ */
+function thehomepage_block_info() {
+  $blocks[0] = array(
+    'info' => t('Primary menu'),
+  );
+  return $blocks;
+}
+
+/**
+ *
+ */
+function thehomepage_block_view($delta='') {
+  $block = array();
+  switch ($delta) {
+    case 0:
+      $block['subject'] = '';
+      $block['content'] = thehomepage_primary_menu_block_content();
+      break;
+  }
+  return $block;
+} 
+
+/**
+ *
+ */
+ function thehomepage_primary_menu_block_content() {
+  $output = array();
+  global $user;
+  $image = '';
+  $output[] = l(t('Discover'), 'node');
+  $output[] = l(t('Shop'), 'node');
+  $output[] = l(t('Tips and discussions'), 'node');
+  if (!isset($user->uid) || $user->uid == 0 ) {
+    $output[] = "<div class='image_inside_album'><a class='image_inside_album_a' href='"  . base_path() . 'node/' . $image . "' >" . t('Sign in') . "</a></div>"; 
+    $output[] = l(t('Sign up'), '');
+  }
+  return theme('item_list', array('items' => $output, 'attributes'=> array('class' => array('primary_menu_block') )));
+}
+
+/**
+ *
+ */
+function thehomepage_bookmarklet_page() {
+  $output = "";
+$url = 'http://'.$_SERVER['SERVER_NAME'].dirname($_SERVER["REQUEST_URI"]);
+
+  $output .= '
+<div id="main">
+
+    <div class="bookmarkHolder">
+        <a href="javascript:(function(){var jsScript=document.createElement(\'script\');
+jsScript.setAttribute(\'type\',\'text/javascript\');
+jsScript.setAttribute(\'src\', \'' . $url . '/bookmarklet_url?url=\'+encodeURIComponent(location.href)+\'&amp;title=\'+encodeURIComponent(document.title));
+document.getElementsByTagName(\'head\')[0].appendChild(jsScript);
+})();" class="bookmarkButton">Bookmark to THP!</a>
+        
+        <em>Drag this button to your bookmarks bar and click it when visiting a web site. The title and URL of the page will be saved below.</em>
+    </div>
+</div>
+';
+  return $output;  
+}
+
+/**
+ *
+ */
+function thehomepage_bookmarklet_action() {
+  header('Content-type: application/javascript');
+
+  global $user;
+
+  $uid = $user->uid;
+
+
+ if(empty($_GET['url']) || empty($_GET['title']) || !validateURL($_GET['url'])) die();
+
+  // Sanitizing the variables
+  $_GET['url'] = sanitize($_GET['url']);
+  $_GET['title'] = sanitize($_GET['title']);
+
+  $form = "";
+  $form .= '<form style="padding-left: 15px; text-align: left; float: left; width: 280px; border-left: 1px solid #dddddd; margin-top:5px;">';
+  $form .= '<label> Image name </label><input type="text" id="edit-title" name="title" value="'. $_GET['title'] .'" size="25" maxlength="255" class="form-text required" />';
+  $form .= '<label> Album </label><select id="edit-design-album-field" name="design_album_field" class="form-select required">';
+  $albums = thp_designers_user_albums($uid);
+  foreach ($albums as $key => $value) {
+     $form .= '<option value="' . $key . '">' . $value .'</option>';
+  }
+  $form .= '</select>';
+  
+  $main_navigation_vid = variable_get('thehomepage_main_navigation_vid', '');
+  $main_terms = thp_shops_taxonomy_options_array($main_navigation_vid);
+  $form .= '<label> Category </label><select id="edit-design-category" name="design_category_field" class="form-select required">';
+  foreach ($main_terms as $key => $value) {
+     $form .= '<option value="' . $key . '">' . $value .'</option>';
+  }
+  $form .= '</select>';
+  
+  $form .= '<input style="border:1px solid #ffffff; color: white; background: #1078C1; padding: 5px;" type="submit" id="save_design_image" name="save_design_button" value="Save" class="form-submit" />';
+  $form .= '</form>';
+  $message = '';
+  $doc = new DOMDocument();
+  @$doc->loadHTMLfile($_GET['url'] );
+
+  $images = $doc->getElementsByTagName("img");
+  $count = 1;
+  $js_image = '';
+  $js_image .= '<div style="float: left; width: 500px;">';
+        $avail = false;
+  foreach( $images as $image ) {
+    $size = getimagesize( $image->getAttribute("src"));
+    if ($size) {
+      if ( $size[ 0 ] > 200 && $size[ 1 ] > 100 && $count < 10) { 
+        $avail = true;  
+        $message .= $image->getAttribute("src") . "," ;
+        if (count($images) >= 2) {
+          $js_image .= '<img src="' . $image->getAttribute("src") . ' " width = 140px; height = 100px; style="float:left; border:1px solid #dddddd; margin-right: 10px;">';
+        }
+        else {
+          $js_image .= '<img src="' . $image->getAttribute("src") . ' " width = 80px; height = 80px; style="float:left;  border:1px solid #dddddd; margin-right: 10px;">';
+        } 
+        $count ++;
+      }
+    } elseif (!$size && !$avail) {
+       $js_image = '<div style="float: left; width: 500px;">'  . "No images found";
+       $form = "";
+    }
+  }
+  $js_image .= '</div>';
+/* JavaScript Code */
+
+	// Using pure JavaScript to create and style a div element
+  $output = '
+	var d = document.createElement(\'div\');
+       d.setAttribute(\'id\', \'BookmarkModal\');	
+	with(d.style)
+	{
+    	// Applying styles:        
+		position=\'absolute\';
+		width = \'850px\';
+		height = \'210px\';
+		top = \'30%\';
+		left = \'35%\';
+		margin = \'-30px 0 0 -195px\';
+		backgroundColor = \'#f7f7f7\';
+		border = \'1px solid #ccc\';
+		color = \'#777\';
+		padding = \'15px\';
+		fontSize = \'18px\';
+		fontFamily = \'"Myriad Pro",Arial,Helvetica,sans-serif\';
+		textAlign = \'center\';
+		zIndex = 100000;
+        
+		textShadow = \'1px 1px 0 white\';
+		
+		MozBorderRadius = "12px";
+		webkitBorderRadius = "12px";
+		borderRadius = "12px";
+		
+		MozBoxShadow = \'0 0 6px #ccc\';
+		webkitBoxShadow = \'0 0 6px #ccc\';
+		boxShadow = \'0 0 6px #ccc\';
+	}
+
+//	d.setAttribute(\'onclick\',\'document.body.removeChild(this)\');
+  
+     var closeDiv = document.createElement(\'div\');
+     closeDiv.setAttribute(\'id\', \'CloseModal\');
+     closeDiv.style.cssFloat = "right";
+     closeDiv.style.cursor="pointer";
+     closeDiv.innerHTML = \'[CLOSE]\';
+     d.appendChild(closeDiv);
+     closeDiv.setAttribute(\'onclick\',\'closePopup()\');
+
+
+    // Adding the message passed to the function as text:
+	//d.appendChild(document.createTextNode(\'str\'));
+	/*
+      var mystr = "' . $message. '";
+      var myarr = mystr.split(",");
+       for (var i=0;i<myarr.length;i++) {
+         if (myarr[i].length > 0) {
+           var oImg=document.createElement("img");
+            oImg.setAttribute(\'src\',  myarr[i]);
+            if (myarr.length >= 2) {
+              oImg.style.width= \'140px\';
+              oImg.style.height= \'140px\';
+            } else {
+              oImg.style.width= \'80px\';
+              oImg.style.height= \'80px\';
+            }
+            oImg.style.marginRight= \'10px\';
+            oImg.style.border= \'1px solid #DDDDDD\';
+            d.appendChild(oImg);
+         }     
+       }
+      */       
+    // Appending the div to document
+        d.innerHTML = d.innerHTML+ \'' . $js_image . '\'  + \'' . $form . '\';	
+	document.body.appendChild(d);
+////////////////////////////////////////
+
+   function closePopup() {
+
+    document.getElementById(\'BookmarkModal\').style.display=\'none\';
+
+  }
+
+ ';
+
+echo $output;
+//echo 'displayMessage("'.$message.'");';
+
+//return "";
+}
+
+//////////////////////////
+
+/* Helper functions */
+
+function validateURL($str)
+{
+	return preg_match('/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:\/~\+#]*[\w\-\@?^=%&amp;\/~\+#])?/i',$str);
+}
+
+function sanitize($str)
+{
+	if(ini_get('magic_quotes_gpc'))
+		$str = stripslashes($str);
+
+	$str = strip_tags($str);
+	$str = trim($str);
+	$str = htmlspecialchars($str);
+//	$str = mysqli_real_escape_string($str);
+	
+	return $str;
+}
+
+// Defining fallback functions for mb_substr and 
+// mb_strlen if the mb extension is not installed:
+
+if(!function_exists('mb_substr'))
+{
+	function mb_substr($str,$start,$length,$encoding)
+	{
+		return substr($str,$start,$length);
+	}
+}
+
+if(!function_exists('mb_strlen'))
+{
+	function mb_strlen($str,$encoding)
+	{
+		return strlen($str);
+	}
+}
+

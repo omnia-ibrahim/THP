@@ -1,0 +1,735 @@
+<?php
+
+/**
+ * Implementation of hook_menu
+ */
+function thp_shops_menu () {
+  $items['add_shop_request'] = array (
+    'title' => 'Apply to sell with The Home Page',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('thp_shops_register_shop_form'),
+    'access arguments' => array('access content'),
+    'weight' => 1,
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['admin/structure/thp_categories'] = array(
+    'title' => 'Categories',
+    'description' => 'Manage categorization.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('thp_shops_manage_categories'),
+    'access arguments' => array('administer content'),
+  );
+  $items['admin/structure/thp_categories/list'] = array(
+    'title' => 'List',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['admin/structure/thp_categories/materials'] = array(
+    'title' => 'Relate materials',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('thp_shops_manage_materials'),
+    'access arguments' => array('administer content'),
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['admin/content/thp_registered_shops'] = array(
+    'title' => 'Shops',
+    'description' => 'Shops requests.',
+    'page callback' => 'thp_registered_shops_list',
+    'access arguments' => array('administer content'),
+  );
+  return $items;
+}
+
+/**
+ *
+ */
+function thp_shops_register_shop_form($form, &$form_state) {
+   $form = array();
+  drupal_add_css(drupal_get_path('theme', 'thehome_theme') . '/js/dropzone/css/basic.css');
+  drupal_add_css(drupal_get_path('theme', 'thehome_theme') . '/js/dropzone/css/dropzone.css');
+  drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/dropzone/dropzone.js');
+  drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/thehome_theme.js');
+
+  $form['business_info'] = array(
+    '#title' => t('Business information'),
+    '#type' => 'fieldset',
+  );
+  $form['business_info']['busniess_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Busniess Name'),
+    '#required' => TRUE,
+    '#default_value' => 'Enter your shop or company name',
+    '#maxlength' => 255,
+    '#weight' => -5,
+    '#attributes' => array(
+      'onblur' => "if (this.value == '') {this.value = 'Enter your shop or company name';}",
+      'onfocus' => "if (this.value == 'Enter your shop or company name') {this.value = '';  this.style.color = 'black';}",
+      'onsubmit' => "",
+    ),
+  );
+  $speciality_vid = variable_get('thehomepage_showrooms_vid', '');
+  $form['business_info']['business_speciality'] = array (
+    '#type' => 'select',
+    '#title' => t('Speciality'),
+    '#multiple' => TRUE,
+    '#required' => TRUE,
+    '#default_value' => 'Choose your speciality',
+    '#options' => thp_shops_taxonomy_options_array($speciality_vid),
+  );
+  $countries = array();
+  
+  $result = db_query("SELECT * FROM {uc_countries}");
+  foreach ($result as $country) {
+    $countries[$country->country_id] = t($country->country_name);   
+  }
+  $form['business_info']['business_country'] = array (
+    '#type' => 'select',
+    '#title' => t('Country'),
+    '#required' => TRUE,
+    '#default_value' => 'Choose the business country',
+    '#options' => $countries,
+  );
+  $form['business_info']['busniess_website'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Website'),
+    '#required' => TRUE,
+    '#default_value' => 'http://',
+    '#maxlength' => 255,
+    '#weight' => -5,
+    '#attributes' => array(
+      'onblur' => "if (this.value == '') {this.value = 'http://';}",
+      'onfocus' => "if (this.value == 'http://') {this.value = '';   this.style.color = 'black';}",
+      'onsubmit' => "",
+    ),
+  );
+  $form['business_info']['busniess_facebook'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Facebook Page'),
+    '#required' => TRUE,
+    '#default_value' => 'http://facebook.com/',
+    '#maxlength' => 255,
+    '#weight' => -5,
+    '#attributes' => array(
+      'onblur' => "if (this.value == '') {this.value = 'http://facebook.com/';}",
+      'onfocus' => "if (this.value == 'http://facebook.com/') {this.value = '';   this.style.color = 'black';}",
+      'onsubmit' => "",
+    ),
+  );
+
+  $form['business_info']['business_photos'] = array(
+    '#attributes' => array(
+      'class' => array('dropzone')
+     ),
+    '#type' => 'fieldset',
+    '#title' => "Don't have a website or facebook page?",
+    '#description' => "Alternatively please upload at least 5 example photos of your products.",  
+  );
+  ////////////////////////
+  $files_uploaded = array();
+  $_SESSION['fid'][] = '';  
+  if (!empty($_FILES)) {
+    $tempFile = $_FILES['file']['tmp_name'];          //3             
+    $targetPath = variable_get('file_public_path', conf_path() . '/files/uploads/') ;  //4
+    $targetFile =  $targetPath. $_FILES['file']['name'];  //5
+    // move_uploaded_file($tempFile, $targetFile); //6
+    $file = file_save_data(file_get_contents($tempFile), 'public://' . $_FILES['file']['name'] ); 
+    //$file = file_save_data(file_get_contents($image_url), file_default_scheme().'://products_images/'.basename($image_url));
+    $file->uid = $user->uid;
+    $_SESSION['fid'][] = $file->fid;
+  }
+
+    /////////////////////////
+
+//  $form['business_info']['business_photos']['#attributes']['class'][] = 'dropzone';  
+  $form['contact_info'] = array(
+    '#title' => t('Contact information'),
+    '#type' => 'fieldset',
+  );
+  $form['contact_info']['contact_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Full name'),
+    '#required' => TRUE,
+    '#default_value' => '',
+    '#maxlength' => 255,
+    '#default_value' => 'Contact person name',
+    '#weight' => 10,
+    '#attributes' => array(
+      'onblur' => "if (this.value == '') {this.value = 'Contact person name';}",
+      'onfocus' => "if (this.value == 'Contact person name') {this.value = ''; this.style.color = 'black';}",
+      'onsubmit' => "",
+    ),
+  );
+  $form['contact_info']['contact_title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#required' => TRUE,
+    '#default_value' => '',
+    '#maxlength' => 255,
+    '#weight' => 15,
+    '#default_value' => 'Contact person title',
+    '#attributes' => array(
+      'onblur' => "if (this.value == '') {this.value = 'Contact person title';}",
+      'onfocus' => "if (this.value == 'Contact person title') {this.value = ''; this.style.color = 'black';}",
+      'onsubmit' => "",
+    ),
+  );
+  $form['contact_info']['contact_mobile'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Mobile'),
+    '#required' => TRUE,
+    '#default_value' => '',
+    '#maxlength' => 255,
+    '#weight' => 20,
+    '#default_value' => 'Contact person mobile',
+    '#attributes' => array(
+      'onblur' => "if (this.value == '') {this.value = 'Contact person mobile';}",
+      'onfocus' => "if (this.value == 'Contact person mobile') {this.value = '';  this.style.color = 'black';}",
+      'onsubmit' => "",
+    ),
+  );
+  $form['contact_info']['contact_email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Email'),
+    '#required' => TRUE,
+    '#default_value' => '',
+    '#maxlength' => 255,
+    '#weight' => 25,
+    '#default_value' => 'Contact person email',
+    '#attributes' => array(
+      'onblur' => "if (this.value == '') {this.value = 'Contact person email'; }",
+      'onfocus' => "if (this.value == 'Contact person email') {this.value = ''; this.style.color = 'black';}",
+      'onsubmit' => "",
+    ),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit request'),
+    '#prefix' => '<div class="action">',
+    '#suffix' => '</div>',
+    '#weight' => 100,
+  );
+  return $form;
+}
+
+/**
+ *
+ */
+function thp_shops_register_shop_form_submit($form, &$form_state) {
+  $files = $_SESSION['fid'];  
+
+  $query = db_insert('thp_shops_register')->fields(array('shop_name', 'shop_website', 'shop_facebook', 'shop_images', 'shop_country', 'shop_category', 'shop_contact_name', 'shop_contact_title', 'shop_contact_email', 'shop_contact_phone', 'added_time'));
+  $query->values(array(
+          'shop_name' => $form_state['values']['busniess_name'],
+          'shop_website' => $form_state['values']['busniess_website'],
+          'shop_facebook' => $form_state['values']['busniess_facebook'],
+          'shop_images' => implode(', ', $files),
+          'shop_country' => $form_state['values']['business_country'],
+          'shop_category' => implode(', ', array_keys($form_state['values']['business_speciality'])),
+
+          'shop_contact_name' => $form_state['values']['contact_name'],
+          'shop_contact_title' => $form_state['values']['contact_title'],
+          'shop_contact_email' => $form_state['values']['contact_email'],
+          'shop_contact_phone' => $form_state['values']['contact_mobile'],  
+          'added_time' => time(),        
+      ));
+  $query->execute();
+  unset($_SESSION['fid']);
+  drupal_set_message("Saved");
+}
+
+/**
+ * Function to manage categories and relations among them
+ */
+function thp_shops_manage_categories($form) {
+  $form['thp_categories_parents'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'Parents relation',
+  );
+  $main_navigation_vid = variable_get('thehomepage_main_navigation_vid', '');
+  $main_terms = thp_shops_taxonomy_options_array($main_navigation_vid);
+
+  $sub_main_vid = variable_get('thehomepage_sub_main_navigation_vid', '');
+  $sub_main_terms = thp_shops_taxonomy_options_array($sub_main_vid);
+  foreach ($main_terms as $key => $value) {
+    $main_old_array= array(); 
+    $result = db_query('SELECT * FROM {thp_shops_main_navigation_parents} WHERE parent =:parent', array(':parent' => $key));
+    foreach($result as $old) {
+      $main_old_array[$old->tid] = $old->tid;
+    }  
+    $form['thp_categories_parents']['sub_main_navigation_' . $key] = array(
+      '#type' => 'select',
+      '#title' => $value,
+      '#multiple' => true,
+      '#options' => $sub_main_terms,
+      '#default_value' => $main_old_array,
+    ); 
+  }
+  $form['thp_categories_eshop_parents'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'Eshop Parents relation',
+  );
+  $eshop_navigation_vid = variable_get('thehomepage_eshop_main_navigation_vid', '');
+  $eshop_terms = thp_shops_taxonomy_options_array($eshop_navigation_vid);
+
+  $sub_eshop_vid = variable_get('thehomepage_sub_eshop_navigation_vid', '');
+  $sub_eshop_terms = thp_shops_taxonomy_options_array($sub_eshop_vid);
+  foreach ($eshop_terms as $key => $value) {
+    $eshop_old_array = array();
+    $result = db_query('SELECT * FROM {thp_shops_eshop_navigation_parents} WHERE parent =:parent', array(':parent' => $key));
+    foreach($result as $old) {
+      $eshop_old_array[$old->tid] = $old->tid;
+    }   
+    $form['thp_categories_eshop_parents']['sub_eshop_navigation_' . $key] = array(
+      '#type' => 'select',
+      '#title' => $value,
+      '#multiple' => true,
+      '#options' => $sub_eshop_terms,
+      '#default_value' => $eshop_old_array,
+    );
+  }
+  // Items
+  $form['thp_categories_items'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'Map items to both navigations',
+  ); 
+  $count = 1;
+  $items_vid = variable_get('thehomepage_site_items_vid', '');
+  $items_terms = thp_shops_taxonomy_options_array($items_vid);
+  $items_main_old_array = array();   
+  $items_eshop_old_array = array();  
+
+  $items_sub_main_old_array = array();   
+  $items_eshop_sub_old_array = array();     
+  foreach ($items_terms as $key => $value) {
+    $items_main_old_array[$count] = array();
+    $items_eshop_old_array[$count] = array();
+    
+    $items_sub_main_old_array[$count] = array();
+    $items_eshop_sub_old_array[$count] = array();
+    $form['thp_categories_items']['number_' . $count] = array (
+      '#title' => $count . ' - ' . $value,
+      '#type' => 'fieldset',
+    );
+
+    $result_main = db_query('SELECT * FROM {thp_shops_main_navigation_parents} WHERE tid =:tid AND parent IN (' . implode (',', array_keys($main_terms)) . ")" , array(':tid' => $key));
+
+    foreach($result_main as $old) {
+      $items_main_old_array[$count][$old->parent] = $old->parent;
+    }
+
+    $form['thp_categories_items']['number_' . $count]['items_main_navigation_' . $key] = array(
+      '#type' => 'select',
+      '#title' => 'Main Navigation',
+      '#multiple' => true,
+      '#options' => array(0 => 'None') + $main_terms,
+      '#default_value' => $items_main_old_array[$count], 
+    );  
+
+    $result_sub_main = db_query('SELECT * FROM {thp_shops_main_navigation_parents} WHERE tid =:tid AND parent IN (' . implode (',', array_keys($sub_main_terms)) . ")" , array(':tid' => $key));
+
+    foreach($result_sub_main as $old) {
+      $items_sub_main_old_array[$count][$old->parent] = $old->parent;
+    }
+    $form['thp_categories_items']['number_' . $count]['items_sub_navigation_' . $key] = array(
+      '#type' => 'select',
+      '#title' => 'Sub Main Navigation',
+      '#multiple' => true,
+      '#options' =>  array(0 => 'None') + $sub_main_terms,
+      '#default_value' => $items_sub_main_old_array[$count], 
+    );
+    $result_eshop = db_query('SELECT * FROM {thp_shops_eshop_navigation_parents} WHERE tid =:tid AND parent IN (' . implode (',', array_keys($eshop_terms)) . ")" , array(':tid' => $key));
+
+    foreach($result_eshop as $old) {
+      $items_eshop_old_array[$count][$old->parent] = $old->parent;
+    }  
+    $form['thp_categories_items']['number_' . $count]['items_eshop_navigation_' . $key] = array(
+      '#type' => 'select',
+      '#title' => 'Eshop Navigation',
+      '#multiple' => true,
+      '#options' =>  array(0 => 'None') + $eshop_terms,
+      '#default_value' => $items_eshop_old_array[$count],
+    );   
+    $result_sub_eshop = db_query('SELECT * FROM {thp_shops_eshop_navigation_parents} WHERE tid =:tid AND parent IN (' . implode (',', array_keys($sub_eshop_terms)) . ")" , array(':tid' => $key));
+
+    foreach($result_sub_eshop as $old) {
+      $items_eshop_sub_old_array[$count][$old->parent] = $old->parent;
+    }  
+   
+    $form['thp_categories_items']['number_' . $count]['items_sub_eshop_navigation_' . $key] = array(
+      '#type' => 'select',
+      '#title' => 'Sub Eshop navigation',
+      '#multiple' => true,
+      '#options' =>  array(0 => 'None') + $sub_eshop_terms,
+      '#default_value' => $items_eshop_sub_old_array[$count],
+    );
+    $count ++;
+  }
+  $form['thp_categories_submit'] = array (
+    '#type' => 'submit',
+    '#value' => 'Save',
+  );
+  return $form;
+}
+
+/**
+ *
+ */
+function thp_shops_manage_categories_submit($form, &$form_state) {  
+  foreach($form_state['values'] as $key => $value) {
+    $field = explode ( '_', $key);
+    if ($field[0] == 'sub' && $field[1] == 'main' && $field[2] == 'navigation') {
+      $parent_tid = end ($field); 
+      db_query ("DELETE from {thp_shops_main_navigation_parents} WHERE parent =:parent", array(':parent' => $parent_tid));
+      foreach ($value as $tid) {
+        $query = db_insert('thp_shops_main_navigation_parents')->fields(array('tid', 'parent'));
+        $query->values(array(
+          'tid' => $tid,
+          'parent' => $parent_tid,
+        ));
+        $query->execute();
+      }
+    }
+    //sub_eshop_navigation
+    if ($field[0] == 'sub' && $field[1] == 'eshop' && $field[2] == 'navigation') {
+      $parent_tid = end ($field); 
+      db_query ("DELETE from {thp_shops_eshop_navigation_parents} WHERE parent =:parent", array(':parent' => $parent_tid));
+      foreach ($value as $tid) {
+        $query = db_insert('thp_shops_eshop_navigation_parents')->fields(array('tid', 'parent'));
+        $query->values(array(
+          'tid' => $tid,
+          'parent' => $parent_tid,
+        ));
+        $query->execute();
+      } 
+    }
+    // Case items
+    if ($field[0] == 'items') {
+      $item_tid = end ($field); 
+      $main_navigation_vid = variable_get('thehomepage_main_navigation_vid', '');
+      $main_terms = thp_shops_taxonomy_options_array($main_navigation_vid);
+
+      $sub_main_vid = variable_get('thehomepage_sub_main_navigation_vid', '');
+      $sub_main_terms = thp_shops_taxonomy_options_array($sub_main_vid);
+      
+      $eshop_navigation_vid = variable_get('thehomepage_eshop_main_navigation_vid', '');
+      $eshop_terms = thp_shops_taxonomy_options_array($eshop_navigation_vid);
+
+      $sub_eshop_vid = variable_get('thehomepage_sub_eshop_navigation_vid', '');
+      $sub_eshop_terms = thp_shops_taxonomy_options_array($sub_eshop_vid);
+
+      // Case items - items_main_navigation
+      if ($field[1] == 'main' && $field[2] == 'navigation') {
+        db_query ("DELETE from {thp_shops_main_navigation_parents} WHERE tid = $item_tid AND parent IN (" . implode (',', array_keys($main_terms)) . ")");
+        foreach ($value as $tid) {          
+          $query = db_insert('thp_shops_main_navigation_parents')->fields(array('tid', 'parent'));
+          $query->values(array(
+            'tid' => $item_tid,
+            'parent' => $tid,
+          ));
+          $query->execute();
+        }
+      }
+      // Case items - items_sub_navigation
+      if ($field[1] == 'sub' && $field[2] == 'navigation') {
+        db_query ("DELETE from {thp_shops_main_navigation_parents} WHERE tid = $item_tid AND parent  IN (" . implode (',', array_keys($sub_main_terms)) . ")");
+        foreach ($value as $tid) {          
+          $query = db_insert('thp_shops_main_navigation_parents')->fields(array('tid', 'parent'));
+          $query->values(array(
+            'tid' => $item_tid,
+            'parent' => $tid,
+          ));
+          $query->execute();
+        }
+
+      }
+      // Case items - items_eshop_navigation
+      if ($field[1] == 'eshop' && $field[2] == 'navigation') {
+        db_query ("DELETE from {thp_shops_eshop_navigation_parents} WHERE tid = $item_tid AND parent IN (" . implode (',', array_keys($eshop_terms)) . ")");
+        foreach ($value as $tid) {
+          $query = db_insert('thp_shops_eshop_navigation_parents')->fields(array('tid', 'parent'));
+          $query->values(array(
+            'tid' => $item_tid,
+            'parent' => $tid,
+          ));
+          $query->execute();
+        }
+      }
+      // Case items - items_sub_eshop_navigation
+      if ($field[1] == 'sub' && $field[2] == 'eshop' && $field[3] == 'navigation') {
+        db_query ("DELETE from {thp_shops_eshop_navigation_parents} WHERE tid = $item_tid AND parent IN (" . implode (',', array_keys($sub_eshop_terms)) . ")");
+        foreach ($value as $tid) {
+          $query = db_insert('thp_shops_eshop_navigation_parents')->fields(array('tid', 'parent'));
+          $query->values(array(
+            'tid' => $item_tid,
+            'parent' => $tid,
+          ));
+          $query->execute();
+        }        
+      }
+    }
+  }
+}
+
+/**
+ *
+ */
+function thp_shops_manage_materials($form) {
+  $finish_vid = variable_get('thehomepage_finish_material_vid', '');
+  $structure_vid = variable_get('thehomepage_structure_material_vid', '');
+  $fabric_vid = variable_get('thehomepage_fabric_material_vid', '');
+
+  $main_materials_vid = db_query("SELECT * FROM {thp_shops_main_navigation_materials_relation}");
+  $main_default_finish = array();
+  $main_default_structure = array();
+  $main_default_fabric = array();
+
+  $eshop_default_finish = array();
+  $eshop_default_structure = array();
+  $eshop_default_fabric = array();
+  foreach ($main_materials_vid as $m_vid) {
+    if ($m_vid -> material_tid == $finish_vid) {
+      $main_default_finish[$m_vid->tid] = $m_vid->tid;
+    }
+    if ($m_vid -> material_tid == $structure_vid) {
+      $main_default_structure[$m_vid->tid] = $m_vid->tid;
+    }
+    if ($m_vid -> material_tid == $fabric_vid) {
+      $main_default_fabric[$m_vid->tid] = $m_vid->tid;
+    }
+  } 
+  $eshop_materials_vid = db_query("SELECT * FROM {thp_shops_eshop_navigation_materials_relation}");
+  foreach ($eshop_materials_vid as $m_vid) {
+     if ($m_vid -> material_tid == $finish_vid) {
+      $eshop_default_finish[$m_vid->tid] = $m_vid->tid;
+    }
+    if ($m_vid -> material_tid == $structure_vid) {
+      $eshop_default_structure[$m_vid->tid] = $m_vid->tid;
+    }
+    if ($m_vid -> material_tid == $fabric_vid) {
+      $eshop_default_fabric[$m_vid->tid] = $m_vid->tid;
+    }
+  } 
+
+  $items_vid = variable_get('thehomepage_site_items_vid', '');
+  $items_terms = thp_shops_taxonomy_options_array($items_vid);
+
+  $main_navigation_vid = variable_get('thehomepage_main_navigation_vid', '');
+  $main_terms = thp_shops_taxonomy_options_array($main_navigation_vid);
+
+  $sub_main_vid = variable_get('thehomepage_sub_main_navigation_vid', '');
+  $sub_main_terms = thp_shops_taxonomy_options_array($sub_main_vid);
+
+  $value_array = array();
+
+  $main_items_tids = db_query("SELECT * FROM {thp_shops_main_navigation_parents} where parent in (" . implode(', ', array_keys($main_terms)). ")");
+  
+  foreach ($main_items_tids as $main_items_tid) {
+    if(!isset($items_terms[$main_items_tid->tid])) {
+      $value_array[$main_items_tid->tid] = $sub_main_terms[$main_items_tid->tid];  
+    } else {
+       $value_array[$main_items_tid->tid] = $items_terms[$main_items_tid->tid];
+    }
+  }
+  // Sub items
+  $sub_main_items_tids = db_query("SELECT parent as tid FROM {thp_shops_main_navigation_parents} where parent in (" . implode(', ', array_keys($sub_main_terms)). ") AND tid IN (" . implode(',', array_keys($items_terms)) . ")");
+  
+  foreach ($sub_main_items_tids as $sub_main_items_tid) {
+    if(!isset($items_terms[$sub_main_items_tid->tid])) {
+      $value_array[$sub_main_items_tid->tid] = $sub_main_terms[$sub_main_items_tid->tid];  
+    } else {
+       $value_array[$sub_main_items_tid->tid] = $items_terms[$sub_main_items_tid->tid];
+    }
+  }  
+  // Eshop
+  $eshop_navigation_vid = variable_get('thehomepage_eshop_main_navigation_vid', '');
+  $eshop_terms = thp_shops_taxonomy_options_array($eshop_navigation_vid);
+
+  $sub_eshop_vid = variable_get('thehomepage_sub_eshop_navigation_vid', '');
+  $sub_eshop_terms = thp_shops_taxonomy_options_array($sub_eshop_vid);
+
+  $eshop_value_array = array();
+
+  $eshop_items_tids = db_query("SELECT * FROM {thp_shops_eshop_navigation_parents} where parent in (" . implode(', ', array_keys($eshop_terms)). ")");
+  
+  foreach ($eshop_items_tids as $eshop_items_tid) {
+    if(!isset($items_terms[$eshop_items_tid->tid])) {
+      $eshop_value_array[$eshop_items_tid->tid] = $sub_eshop_terms[$eshop_items_tid->tid];  
+    } else {
+       $eshop_value_array[$eshop_items_tid->tid] = $items_terms[$eshop_items_tid->tid];
+    }
+  }
+  // Sub items
+  $sub_eshop_items_tids = db_query("SELECT parent as tid FROM {thp_shops_eshop_navigation_parents} where parent in (" . implode(', ', array_keys($sub_eshop_terms)). ") AND tid IN (" . implode(',', array_keys($items_terms)) . ")");
+  
+  foreach ($sub_eshop_items_tids as $sub_eshop_items_tid) {
+    if(!isset($items_terms[$sub_eshop_items_tid->tid])) {
+      $eshop_value_array[$sub_eshop_items_tid->tid] = $sub_eshop_terms[$sub_eshop_items_tid->tid];  
+    } else {
+       $eshop_value_array[$sub_eshop_items_tid->tid] = $items_terms[$sub_eshop_items_tid->tid];
+    }
+  }
+
+  $form['finish_info'] = array(
+    '#title' => t('Finish materials'),
+    '#type' => 'fieldset',
+  );
+  $form['finish_info']['finish_main_vid_' . $finish_vid] = array(
+    '#type' => 'select',
+    '#title' => t('Main Categories'),
+    '#required' => TRUE,
+    '#multiple' => TRUE,
+    '#options' => $value_array,
+    '#default_value' => $main_default_finish,
+    '#weight' => -5,  
+  );
+  $form['finish_info']['finish_eshop_vid_' . $finish_vid] = array(
+    '#type' => 'select',
+    '#title' => t('Eshop Categories'),
+    '#required' => TRUE,
+    '#multiple' => TRUE,
+    '#options' => $eshop_value_array,
+    '#default_value' => $eshop_default_finish,
+    '#weight' => 5,  
+  );
+  //////////////////////////
+
+  $form['structure_info'] = array(
+    '#title' => t('Structure materials'),
+    '#type' => 'fieldset',
+  );
+  $form['structure_info']['structure_main_vid_' . $structure_vid] = array(
+    '#type' => 'select',
+    '#title' => t('Main Categories'),
+    '#required' => TRUE,
+    '#multiple' => TRUE,
+    '#options' => $value_array,
+    '#default_value' => $main_default_structure,
+    '#weight' => -5,  
+  );
+  $form['structure_info']['structure_eshop_vid_' . $structure_vid] = array(
+    '#type' => 'select',
+    '#title' => t('Eshop Categories'),
+    '#required' => TRUE,
+    '#multiple' => TRUE,
+    '#options' => $eshop_value_array,
+    '#default_value' => $eshop_default_structure,
+    '#weight' => 5,  
+  ); 
+  ///////////////////////////
+  $form['fabric_info'] = array(
+    '#title' => t('Fabric materials'),
+    '#type' => 'fieldset',
+  );
+  $form['fabric_info']['fabric_main_vid_' . $fabric_vid] = array(
+    '#type' => 'select',
+    '#title' => t('Main Categories'),
+    '#required' => TRUE,
+    '#multiple' => TRUE,
+    '#options' => $value_array,
+    '#default_value' => $main_default_fabric,
+    '#weight' => -5,  
+  );
+  $form['fabric_info']['fabric_eshop_vid_' . $fabric_vid] = array(
+    '#type' => 'select',
+    '#title' => t('Eshop Categories'),
+    '#required' => TRUE,
+    '#multiple' => TRUE,
+    '#options' => $eshop_value_array,
+    '#default_value' => $eshop_default_fabric,
+    '#weight' => 5,  
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+    '#weight' => 100,
+  );
+  return $form;
+}
+
+/**
+ *
+ */
+function thp_shops_manage_materials_submit($form, &$form_state) {
+  foreach($form_state['values'] as $key => $value) {
+    $field = explode ( '_', $key);
+    if (sizeof($field) > 2) {
+      if ($field[1] == 'main' && $field[2] == 'vid') {
+        $material_tid = end ($field); 
+        db_query ("DELETE from {thp_shops_main_navigation_materials_relation} WHERE material_tid =:material_tid", array(':material_tid' => $material_tid));
+        foreach ($value as $tid) {
+          $query = db_insert('thp_shops_main_navigation_materials_relation')->fields(array('tid', 'material_tid'));
+          $query->values(array(
+           'tid' => $tid,
+           'material_tid' => $material_tid,
+          ));
+          $query->execute();
+        }
+      }
+      if ($field[1] == 'eshop' && $field[2] == 'vid') {
+        $material_tid = end ($field); 
+        db_query ("DELETE from {thp_shops_eshop_navigation_materials_relation} WHERE material_tid =:material_tid", array(':material_tid' => $material_tid));
+        foreach ($value as $tid) {
+          $query = db_insert('thp_shops_eshop_navigation_materials_relation')->fields(array('tid', 'material_tid'));
+          $query->values(array(
+            'tid' => $tid,
+            'material_tid' => $material_tid,
+          ));
+          $query->execute();
+        }
+      }
+   }
+  }
+}
+/**
+ * returns a array for use with #options in a form field
+ *
+ */
+function thp_shops_taxonomy_options_array($vid) {
+  $terms = taxonomy_get_tree($vid);
+  $options = array(); 
+ foreach ($terms as $term) {
+    $options[$term->tid] = $term->name;
+  }
+  return $options;
+}
+
+/**
+ *
+ */
+function thp_registered_shops_list() {
+ 
+  $count = 1;
+  $rows = array();
+  $header = array(array("data" => 'No.'), array("data" =>'Shop Name'), array("data" =>'Facebook page'), array("data" =>'Website'), array("data" =>'Speciality'), array("data" =>'Country'), array("data" =>'Shop Images'), array("data" =>'Full Name'), array("data" =>'Title'), array("data" =>'Mobile'), array("data" =>'Email')); 
+  $result = db_query("SELECT * FROM {thp_shops_register}  ORDER BY added_time DESC");
+
+  foreach ($result as $entry) {
+    $tids = explode(',', $entry->shop_category);
+    $terms = taxonomy_term_load_multiple($tids);
+    $term_name = array();
+    foreach ($terms as $term) {
+     $term_name[] = $term->name;
+    }
+   $country_name = db_query("SELECT country_name from {uc_countries} WHERE country_id =:country_id", array(":country_id"=> $entry->shop_country))->fetchField(); 
+
+   // Images
+   $shop_image = array();
+   $images = explode(',' , $entry->shop_images);
+   if (!empty($images)) {
+     foreach($images as $image) {
+        if (is_numeric($image)) {
+          $shop_image[] =  theme('image', array('path' => file_load($image)->uri, 'attributes' => array('width' => '50', 'height' => '50')));
+        }
+     }
+   }
+   $rows[] = array($count, $entry->shop_name, $entry->shop_facebook, $entry->shop_website, implode(', ', $term_name), $country_name, implode(', ', $shop_image), $entry->shop_contact_name, $entry->shop_contact_title, $entry-> shop_contact_phone, $entry-> shop_contact_email);   
+    $count ++;
+  }
+  return theme('table', array(
+             // value header will be in $header
+             'header' => $header, 
+             // value rows will be taken out of $rows
+             'rows'=> $rows 
+           )); 
+}

@@ -1,0 +1,5 @@
+name = TheHomePage designers module
+description = TheHomePage designers module.
+core = 7.x
+package = TheHomePage
+

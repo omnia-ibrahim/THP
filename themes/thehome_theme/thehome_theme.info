@@ -1,0 +1,13 @@
+name = TheHomePage Theme
+description = Main theme for thehomepage
+
+package = TheHomePage
+core = 7.x
+stylesheets[all][] = css/style.css
+
+scripts[] = js/thehome_theme.js
+
+regions[header] = Header
+regions[sidebar_first] = First sidebar
+regions[content] = Content
+regions[footer] = Footer

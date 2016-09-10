@@ -1,0 +1,268 @@
+<?php
+
+/**
+ *
+ */
+function thp_profiles_menu() {
+
+  $items['user/%user/profile'] = array(
+    'title' => 'Profile type',
+    'page callback' => 'thp_profiles_profile_type',
+    'page arguments' => array(1),
+    'access callback' => 'user_edit_access',
+    'access arguments' => array(1),
+  );
+  return $items;
+}
+
+/**
+ *
+ */
+function thp_profiles_profile_type($user) {
+   $output = '';
+   $output .= l(theme('image', array('path' =>drupal_get_path('module', 'thp_profiles') . '/images/designer.png')), 'user/' . $user->uid . '/edit', array('html'=>true, 'query' => array('profile_type' => 'designer')));
+   $output .= l(theme('image', array('path' =>drupal_get_path('module', 'thp_profiles') . '/images/member.png')), 'user/' . $user->uid . '/edit', array('html'=>true));
+
+  return $output; 
+}
+
+/**
+ *
+ */
+function thp_profiles_form_alter(&$form, &$form_state, $form_id) {
+  global $user;
+  switch ($form_id) {
+    case 'user_profile_form':
+
+      $result = db_query('SELECT * FROM {thp_profiles_general} WHERE uid =:uid', array(':uid' => $user-> uid));
+     
+      foreach ($result as $record) {
+        $address = $record->profile_address;
+        $fb = $record->fb_account; 
+        $twitter = $record->twitter_account; 
+        $website = $record->website; 
+        $phone = $record->phone; 
+     }
+      $form['contact_details'] = array(
+         '#type' => 'fieldset',
+         '#title' => 'Contact details',
+      );
+      $form['contact_details']['website'] = array (
+         '#type' => 'textfield',
+         '#title' => 'Website',
+         '#default_value' => isset($website)? $website : '',
+         '#description' => 'Add your website url'
+      );
+      $form['contact_details']['fb'] = array (
+         '#type' => 'textfield',
+         '#title' => 'Facebook',
+         '#default_value' => isset($fb)? $fb : '',
+         '#description' => 'Add your facebook account'
+      );
+      $form['contact_details']['twitter'] = array (
+         '#type' => 'textfield',
+         '#title' => 'Twitter',
+         '#default_value' => isset($twitter)? $twitter : '',
+         '#description' => 'Add your twitter account'
+      );
+      $form['contact_details']['phone'] = array (
+         '#type' => 'textfield',
+         '#title' => 'Phone',
+         '#default_value' => isset($phone)? $phone : '', 
+         '#description' => 'Add your phone number'
+      );
+      $form['contact_details']['address'] = array (
+         '#type' => 'textfield',
+         '#title' => 'Address',
+         '#default_value' => isset($address)? $address : '',
+         '#description' => 'Add your address'
+      );
+
+      drupal_add_js(drupal_get_path('module', 'thp_profiles') . '/thp_profiles.js');
+      $value = 0;
+      $url = end(explode('=', $_SERVER['QUERY_STRING']));
+      if ($url == 'designer') {
+         $value = 1;
+      }
+      $form['designer_flag'] = array(
+        '#type' => 'checkbox',
+        '#title' => 'Designer',
+        '#value' => 1, //$value,
+        '#disabled' => true,
+        '#description' => 'Select if you are a designer.',
+      );
+      $form['designer_fieldset'] = array (
+        '#type' => 'fieldset',
+        '#title' => 'Personal data'
+      );
+      $form['designer_fieldset']['speciality'] = array (
+        '#type' => 'checkboxes',
+        '#title' => 'Speciality',
+        '#options' => thp_profiles_return_terms_from_vocab(variable_get('thehomepage_profile_speciality_vid', '')),
+       );
+       $form['designer_fieldset']['experience'] = array (
+         '#type' => 'select',
+         '#title' => 'Experience',
+         '#options' => thp_profiles_return_terms_from_vocab(variable_get('thehomepage_designer_experience_vid', '')),
+       );
+       $form['designer_fieldset']['designer_title'] = array (
+         '#type' => 'select',
+         '#title' => 'Current Title',
+         '#options' => thp_profiles_return_terms_from_vocab(variable_get('thehomepage_designer_title_vid', '')),
+       );
+       $form['designer_fieldset']['designer_style'] = array (
+         '#type' => 'select',
+         '#title' => 'Styles',
+         '#multiple' => true,
+         '#options' => thp_profiles_return_terms_from_vocab(variable_get('thehomepage_profile_style_vid', '')),
+       );
+       $form['designer_fieldset']['professional_availability'] = array (
+         '#type' => 'select',
+         '#title' => 'Availability',
+         '#options' => thp_profiles_return_terms_from_vocab(variable_get('thehomepage_designer_availability_vid', '')),
+       );
+       $form['designer_fieldset']['designer_service'] = array (
+         '#type' => 'select',
+         '#title' => 'Services',
+         '#multiple' => TRUE,
+         '#options' => thp_profiles_return_terms_from_vocab(variable_get('thehomepage_designer_service_vid', '')),
+       );
+       $form['#submit'][] = 'thp_profiles_form_submit';
+       break;
+  }
+}
+
+/**
+ *
+ */
+function thp_profiles_form_submit($form, &$form_state) {
+
+//  print_r($form_state['values']['designer_flag']);
+  
+  $general_data = db_query('SELECT COUNT(*) FROM {thp_profiles_general} WHERE uid = :uid', array(':uid' => $form_state['values']['uid']))->fetchField(); 
+  if(empty($general_data) || !isset($general_data)) {
+    $query = db_insert('thp_profiles_general')->fields(array('uid', 'profile_type', 'website', 'fb_account', 'twitter_account', 'profile_address', 'phone' ));
+    $query->values(array(
+          'uid' => $form_state['values']['uid'],
+          'profile_type' => $form_state['values']['designer_flag'],
+          'website' => $form_state['values']['website'],
+          'fb_account' => $form_state['values']['fb'],
+          'twitter_account' => $form_state['values']['twitter'],
+          'profile_address' => $form_state['values']['address'],
+          'phone' => $form_state['values']['phone'],
+      ));
+      $query->execute();
+
+   } else {
+   
+      $fields = array(
+          'profile_type' => $form_state['values']['designer_flag'],
+          'website' => $form_state['values']['website'],
+          'fb_account' => $form_state['values']['fb'],
+          'twitter_account' => $form_state['values']['twitter'],
+          'profile_address' => $form_state['values']['address'],
+          'phone' => $form_state['values']['phone'],
+      );
+      db_update('thp_profiles_general')
+        ->fields($fields)
+        ->condition('uid', $form_state['values']['uid'])
+        ->execute();
+    }
+ /* while ($g_data = $general_data->fetchAssoc()) {
+    $name = db_query("SELECT name FROM {users} WHERE uid = :uid", array(':uid' => $member['uid']))->fetchAssoc();
+    $user_name =  array(
+      '#id' =>  'people-' . $member['uid'] . '-username',
+      '#title' => $name['name'],
+      '#type' => 'link',
+      '#href' => sprintf('user/%d', $member['uid']),
+    );
+  }
+  $query = db_insert('thp_profiles_general')->fields(array('uid', 'notify_type', 'created', 'notify_text'));
+      $query->values(array(
+          'uid' => $usee,
+          'notify_type' => 1,
+          'created' => time(),
+          'notify_text' => $body,
+      ));
+      $query->execute();
+
+   */
+
+
+}
+
+/**
+ *
+ */
+function thp_profiles_return_terms_from_vocab($vid) {
+  $options = array();
+  if ($terms = taxonomy_get_tree($vid)) {
+      foreach ($terms as $term) {
+        $options[$term->tid] = str_repeat('-', $term->depth) . $term->name;
+      }
+    }
+  return $options;
+}
+
+/**
+ * Hook_user_login
+ */
+function thp_profiles_user_login(&$edit, $account) {
+  $result = db_query('SELECT * FROM {thp_profiles_general} WHERE uid =:uid', array(':uid' => $account-> uid));
+  if (empty($result->uid)) {
+    $destination = 'user/' . $account->uid . '/edit'; 
+  }
+  else {
+   
+    $destination = 'user';
+  }
+  $edit['redirect'] = $destination;
+  $_GET['destination'] = $destination;
+}
+
+/**
+ *
+ */
+function thp_profiles_user_view($account, $view_mode, $langcode) {
+  global $user;
+
+  /*  
+ theme('item_list', array('items' => $output, 'attributes'=> array('class' => 'gm3eya_user_friends') ));
+
+
+  $account->content['thp_profiles_profile_tabs'] = array (
+    '#markup' => '<div id="tabs_inside_profile">' . thp_profiles_user_albums($account->uid) . '</div>',
+    '#weight' => 400,
+  );
+ */
+  $edit = '';
+  if ($user->uid == $account->uid) {
+    $edit = "<div id='profile_edit_link'>" . l(t('Edit'), 'user/' . $account->uid . '/edit');
+  } 
+  // Tabs
+  
+  // Followers
+  
+  $account->content['thp_profiles_albums'] = array (
+    '#markup' => $edit . '</div>' . '' . '<div id="user_albums_in_profile"><h2> Albums </h2>' . thp_profiles_user_albums($account->uid) . '</div>',
+    '#weight' => 500,
+  );
+}
+
+
+/**
+ *
+ */
+function thp_profiles_user_albums($uid) {
+  $result = db_query('SELECT * FROM {node} WHERE uid =:uid AND type =:type', array(':uid' => $uid, ':type' => 'design_album'));
+  $output = "";
+  foreach ($result as $record) {
+     $node = node_load ($record->nid);
+     $output .="<div id='album_containers_inside_profile'>" . l(theme('image', array('path' => file_load($node->field_album_images['und'][0]['fid'])->uri )), 'node/' . $record->nid, array('html' => true))  . l($record->title, 'node/' . $record->nid) . "</div>";
+  }
+  if (empty($output)) {
+     $output =  l(theme('image', array('path' => drupal_get_path('module', 'thp_designers') . '/images/add_new_album.jpg')), 'node/add/design-album', array("html" => true));
+  }
+  return $output;
+}
+

@@ -1,0 +1,176 @@
+<?php
+
+/**
+ *
+ */
+function thp_search_block_info() {
+  $blocks[0] = array(
+    'info' => t('Main products navigation categories'),
+  );
+  return $blocks;
+}
+
+/**
+ *
+ */
+function thp_search_block_view($delta='') {
+  $block = array();
+  switch ($delta) {
+    case 0:
+      $block['subject'] = t('Color');
+      $block['content'] = thp_search_block_content();
+      break;
+  }
+  return $block;
+} 
+
+/**
+ *
+ */
+function thp_search_block_content() {
+  
+  //$c = 'DC143C';
+  //$x = convertToClosest($c);
+  $output = '';
+  $color_vid =   variable_get('thehomepage_color_vid', '');
+  $terms = entity_load('taxonomy_term', FALSE, array('vid' => $color_vid));
+  foreach ($terms as $term) {
+    $output .= l("<div style='width: 30px; height: 30px; border: 1px solid #dddddd; background:" . $term->name . ";'></div>", 'taxonomy/term/' . $term->tid, array('html' => true, 'attributes' => array(
+
+  'class'=> array('search_color_filter'),
+
+  'onclick' => 'if(!confirm("Ready to do something?")){return false;}'
+
+
+))
+
+
+);
+  }
+  return $output;
+}
+
+/**
+ *
+ */
+function thp_search_form_alter (&$form, &$form_state, $form_id) {
+  if ($form_id == 'search_block_form') { 
+    $form['search_block_form']['#attributes']['onblur'] = "if (this.value == '') {this.value = 'Search';}";
+    $form['search_block_form']['#attributes']['onfocus'] = "if (this.value == 'Search') {this.value = '';}";
+    // Prevent user from searching the default text
+    $form['#attributes']['onsubmit'] = "if(this.search_block_form.value=='Search'){ alert('Please enter a search'); return false; }";
+    // Alternative (HTML5) placeholder attribute instead of using the javascript
+    $form['search_block_form']['#attributes']['placeholder'] = t('Search');
+  }
+}
+
+/**
+ *
+ */
+function convertToClosest($c) {
+    // set minimum difference you'll allow between colors
+    $minDiff = 1000;
+  
+    // generate color array
+    $colorArrayOriginal = array(
+      'Maroon' => '800000',
+      'Red' => 'ff0000', 
+      'Orange' => 'ffA500', 
+      'Yellow' => 'ffff00', 
+      'Olive' => '808000',
+      'Purple' => '800080', 
+      'Fuchsia' => 'ff00ff', 
+      'White' => 'ffffff', 
+      'Lime' => '00ff00', 
+      'Green' => '008000',
+      'Navy' => '000080', 
+      'Blue' => '0000ff', 
+      'Aqua' => '00ffff', 
+      'Teal' => '008080',
+      'Black' => '000000', 
+      'Silver' => 'c0c0c0', 
+      'Gray' => '808080',
+    );
+
+    foreach ($colorArrayOriginal as $colorID => $color) {
+        $r = substr($color,0,2);
+        $g = substr($color,2,2);
+        $b = substr($color,4,2);
+        $colorArray[$colorID] = array($r,$g,$b);    
+    }
+    // here, we break apart the color we input, $c
+    $r = substr($c,0,2);
+    $g = substr($c,2,2);
+    $b = substr($c,4,2);
+    $inHex = array($r,$g,$b);
+
+    $color = false;
+    // we define the "best so far" variable as the min, since we can't have a best that's more
+    $bestDiff = $minDiff;
+
+    // here, we parse through each of the colors finding the closest, using the native hexdec function to parse
+    // out the best values to compare
+    foreach ($colorArray as $colorID => $cc) {    
+        $diff = abs(hexdec($inHex[0]) - hexdec($cc[0])) + abs(hexdec($inHex[1]) - hexdec($cc[1])) + abs(hexdec($inHex[2]) - hexdec($cc[2]));
+    // if the difference in value between the colors is less than the best one of all the ones we've tried... 
+    if ($diff<=$bestDiff) {
+       $color = $colorID;  
+       $bestDiff = $diff;
+    }
+   }
+  return $color;
+} 
+
+/**
+ *
+ */
+function thp_search_html_color( $term_name) {
+  if ($term_name == 'Red') {   
+    return "ff0000"; 
+  }
+  if ($term_name == 'Orange') {   
+    return "ffA500";
+  }
+  if ($term_name == 'Yellow') {   
+    return "ffff00";
+  } 
+  if ($term_name == 'Olive') {    
+    return "808000";
+  }
+  if ($term_name == 'Purple') {   
+    return "800080";
+  } 
+  if ($term_name == 'Fuchsia') {   
+    return "ff00ff"; 
+  }
+  if ($term_name == 'White') {   
+    return "ffffff"; 
+  }
+  if ($term_name == 'Lime') {   
+    return "00ff00";
+  }
+  if ($term_name == 'Green') {   
+    return "008000";
+  }
+  if ($term_name == 'Navy') {   
+    return "000080";
+  } 
+  if ($term_name == 'Blue') {    
+    return "0000ff"; 
+  }
+  if ($term_name == 'Aqua') {   
+    return "00ffff"; 
+  }
+  if ($term_name == 'Teal') {   
+     return "008080";
+  } 
+  if ($term_name == 'Black') {   
+    return "000000";
+  } 
+  if ($term_name == 'Silver') {   
+    return "c0c0c0"; 
+  }
+  if ($term_name == 'Gray') {   
+    return "808080";
+  }
+}

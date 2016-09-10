@@ -1,0 +1,162 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function thp_search_install() {
+
+
+}
+
+/**
+ * Hook_update for color filter
+ */
+function thp_search_update_1 () {
+ // Designer title
+  $vocabulary = new stdClass();
+  $vocabulary->name = 'Color';
+  $vocabulary->description = 'Colors';
+  $vocabulary->machine_name = 'color_filter';
+  taxonomy_vocabulary_save($vocabulary);
+  $vid = $vocabulary->vid;
+  variable_set('thehomepage_color_vid', $vid);
+
+  /*
+    Maroon #800000
+    Red #ff0000 
+    Orange #ffA500 
+    Yellow #ffff00 
+    Olive #808000
+    Purple #800080 
+    Fuchsia #ff00ff 
+    White #ffffff 
+    Lime #00ff00 
+    Green #008000
+    Navy #000080 
+    Blue #0000ff 
+    Aqua #00ffff 
+    Teal #008080
+    Black #000000 
+    Silver #c0c0c0 
+    Gray #808080
+
+  */
+  $term_1 = (object) array(
+   'name' => 'Maroon', 
+   'description' => '#800000',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_1);
+
+  $term_2 = (object) array(
+   'name' => 'Red', 
+   'description' => '#ff0000', 
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_2);
+  
+  $term_3 = (object) array(
+   'name' => 'Orange',
+   'description' => '#ffA500', 
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_3);
+  
+  $term_4 = (object) array(
+   'name' =>'Yellow',
+   'description' => '#ffff00',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_4);
+
+  $term_5 = (object) array(
+   'name' => 'Olive', 
+   'description' => '#808000',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_5);
+
+  $term_6 = (object) array(
+   'name' => 'Purple',
+   'description' => '#800080', 
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_6);
+ 
+  $term_7 = (object) array(
+    'name' => 'Fuchsia', 
+    'description' => '#ff00ff', 
+    'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_7);
+
+  $term_8 = (object) array(
+   'name' => 'White',
+   'description' => '#ffffff', 
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_8);
+
+  $term_9 = (object) array(
+    'name' => 'Lime',
+    'description' => '#00ff00',
+    'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_9);
+
+  $term_10 = (object) array(
+   'name' => 'Green',
+   'description' => '#008000',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_10);
+
+  $term_11 = (object) array(
+   'name' => 'Navy',
+   'description' => '#000080', 
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_11);
+  
+  $term_12 = (object) array(
+   'name' => 'Blue', 
+   'description' => '#0000ff', 
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_12);
+
+  $term_13 = (object) array(
+   'name' => 'Aqua', 
+   'description' => '#00ffff',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_13);
+
+  $term_14 = (object) array(
+   'name' => 'Teal', 
+   'description' => '#008080',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_14);
+
+  $term_15 = (object) array(
+   'name' => 'Black', 
+   'description' => '#000000', 
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_15);
+
+  $term_16 = (object) array(
+   'name' => 'Silver', 
+   'description' => '#c0c0c0', 
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_16);
+ 
+  $term_17 = (object) array(
+   'name' => 'Gray', 
+   'description' => '#808080',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_17);
+}

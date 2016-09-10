@@ -1,0 +1,5 @@
+name = TheHomePage profiles module
+description = TheHomePage profiles module.
+core = 7.x
+package = TheHomePage
+

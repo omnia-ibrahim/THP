@@ -1,0 +1,1404 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function thp_shops_install() {
+
+  // showrooms category
+  $vocabulary = new stdClass();
+  $vocabulary->name = 'Showrooms categories';
+  $vocabulary->description = 'Showrooms categories';
+  $vocabulary->machine_name = 'showrooms_categories';
+  taxonomy_vocabulary_save($vocabulary);
+  $vid = $vocabulary->vid;
+  variable_set('thehomepage_showrooms_vid', $vid);
+
+  $term_1 = (object) array(
+   'name' => 'Finishing', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_1);
+
+  $term_2 = (object) array(
+   'name' => 'Offices and Workspace', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_2);
+
+  $term_3 = (object) array(
+   'name' => 'Kitchen', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_3);
+
+  $term_4 = (object) array(
+   'name' => 'Home Furniture', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_4);
+
+  $term_5 = (object) array(
+   'name' => 'Outdoor', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_5);
+
+  $term_6 = (object) array(
+   'name' => 'Kids', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_6);
+
+  $term_7 = (object) array(
+   'name' => 'Doors and Windows', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_7);
+
+  $term_8 = (object) array(
+   'name' => 'Art', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_8);
+
+  $term_9 = (object) array(
+   'name' => 'Textiles', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_9);
+
+  $term_10 = (object) array(
+   'name' => 'Lighting and Appliances', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_10);
+ 
+  $term_11 = (object) array(
+   'name' => 'Home Accessories', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_11);
+}
+
+/**
+ * Implements hook_schema().
+ */
+function thp_shops_schema() {
+  $schema['thp_shops_register'] = array(
+    'fields' => array(
+      'sid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'shop_name' => array(
+        'type' => 'varchar',
+        'default' => '',
+        'length' => '512',
+        'description' => 'Shop name.',
+      ),
+      'shop_website' => array(
+        'type' => 'varchar',
+        'length' => '512',
+        'default' => '',
+        'description' => 'The website of the shop.',
+      ),
+      'shop_facebook' => array(
+        'type' => 'varchar',
+        'length' => '512',
+        'default' => '',
+        'description' => 'The facebook page for the shop.',
+      ),
+      'shop_images' => array(
+        'type' => 'varchar',
+        'length' => '512',
+        'default' => '',
+        'description' => 'Array of images fid.',
+      ),
+      'shop_country' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The country of the shop.',
+      ),
+      'shop_category' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The category of the shop.',
+      ),
+      'shop_contact_name' => array(
+        'type' => 'varchar',
+        'length' => '512',
+        'default' => '',
+        'description' => 'Shop contact person name.',
+      ),
+      'shop_contact_title' => array(
+        'type' => 'varchar',
+        'length' => '512',
+        'default' => '',
+        'description' => 'Shop contact person title.',
+      ),
+      'shop_contact_email' => array(
+        'type' => 'varchar',
+        'length' => '512',
+        'default' => '',
+        'description' => 'Shop contact person email.',
+      ),
+      'shop_contact_phone' => array(
+        'type' => 'varchar',
+        'length' => '512',
+        'default' => '',
+        'description' => 'Phone number.',
+      ),
+    ),
+    'primary key' => array('sid'),
+  );
+  return $schema;
+}
+
+/**
+ * Add main navigation vocab and terms
+ */
+function thp_shops_update_1() {
+  // Main navigation categories
+  $vocabulary = new stdClass();
+  $vocabulary->name = 'Main navigation';
+  $vocabulary->description = 'Main site navigation categories (rooms)';
+  $vocabulary->machine_name = 'main_navigation';
+  taxonomy_vocabulary_save($vocabulary);
+  $vid = $vocabulary->vid;
+  variable_set('thehomepage_main_navigation_vid', $vid);
+
+  $term_1 = (object) array(
+   'name' => 'Living', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_1);
+
+  $term_2 = (object) array(
+   'name' => 'Bedroom', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_2);
+
+  $term_3 = (object) array(
+   'name' => 'Dining', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_3);
+
+  $term_4 = (object) array(
+   'name' => 'Kitchen', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_4);
+
+  $term_5 = (object) array(
+   'name' => 'Bathroom', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_5);
+
+  $term_6 = (object) array(
+   'name' => 'Outdoor', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_6);
+
+  $term_7 = (object) array(
+   'name' => 'Wall and floor', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_7);
+
+  $term_8 = (object) array(
+   'name' => 'Art', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_8);
+
+  $term_9 = (object) array(
+   'name' => 'Home accessories', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_9);
+
+  $term_10 = (object) array(
+   'name' => 'Widnows and door', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_10);
+}
+
+
+/**
+ * Add eshop vocab and terms
+ */
+function thp_shops_update_2() {
+  // Main navigation categories
+  $vocabulary = new stdClass();
+  $vocabulary->name = 'Eshop main navigation';
+  $vocabulary->description = 'Eshop main navigation categories';
+  $vocabulary->machine_name = 'main_eshop_navigation';
+  taxonomy_vocabulary_save($vocabulary);
+  $vid = $vocabulary->vid;
+  variable_set('thehomepage_eshop_main_navigation_vid', $vid);
+
+  $term_1 = (object) array(
+   'name' => 'Furniture', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_1);
+
+  $term_2 = (object) array(
+   'name' => 'Bed and bath', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_2);
+
+  $term_3 = (object) array(
+   'name' => 'Electronics', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_3);
+
+  $term_4 = (object) array(
+   'name' => 'Arts gallery', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_4);
+
+  $term_5 = (object) array(
+   'name' => 'Decorating and accessories', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_5);
+
+  $term_6 = (object) array(
+   'name' => 'Dining and kitchen', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_6);
+
+  $term_7 = (object) array(
+   'name' => 'Carpets and curtains', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_7);
+}
+
+/**
+ * Add sub main navigation vocab and terms
+ */
+function thp_shops_update_3() {
+  // Main navigation categories
+  $vocabulary = new stdClass();
+  $vocabulary->name = 'Sub main navigation';
+  $vocabulary->description = 'Sub main categories(not the leaf)';
+  $vocabulary->machine_name = 'sub_main_navigation';
+  taxonomy_vocabulary_save($vocabulary);
+  $vid = $vocabulary->vid;
+  variable_set('thehomepage_sub_main_navigation_vid', $vid);
+
+  $term_1 = (object) array(
+   'name' => 'Sofas', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_1);
+
+  $term_2 = (object) array(
+   'name' => 'Chairs', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_2);
+
+  $term_3 = (object) array(
+   'name' => 'Tables', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_3);
+
+  $term_4 = (object) array(
+   'name' => 'Storage units', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_4);
+
+  $term_5 = (object) array(
+   'name' => 'Home office', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_5);
+////////////////
+  $term_6 = (object) array(
+   'name' => 'Bedroom sets', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_6);
+  $term_7 = (object) array(
+   'name' => 'Beds', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_7);
+  $term_8 = (object) array(
+   'name' => 'Storages', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_8);
+  $term_9 = (object) array(
+   'name' => 'Bedroom textiles', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_9);
+  $term_10 = (object) array(
+   'name' => 'Serving Ware', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_10);
+  $term_11 = (object) array(
+   'name' => 'Sinks and faucets', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_11);
+  $term_12 = (object) array(
+   'name' => 'Cookware', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_12);
+  $term_13 = (object) array(
+   'name' => 'Gadgets and accessories', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_13);
+
+  $term_14 = (object) array(
+   'name' => 'Bathroom sets', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_14);
+
+  $term_15 = (object) array(
+   'name' => 'Showers', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_15);
+
+  $term_16 = (object) array(
+   'name' => 'Faucets', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_16);
+
+  $term_17 = (object) array(
+   'name' => 'Textiles', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_17);
+
+  $term_18 = (object) array(
+   'name' => 'Outdoor Furniture', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_18);
+
+  $term_19 = (object) array(
+   'name' => 'Pools', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_19);
+
+  $term_20 = (object) array(
+   'name' => 'Tools', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_20);
+
+  $term_21 = (object) array(
+   'name' => 'Outdoor Accessories', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_21);
+
+  $term_22 = (object) array(
+   'name' => 'Lightings', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_22);
+
+  $term_23 = (object) array(
+   'name' => 'Carpets and rugs', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_23);
+
+  $term_24 = (object) array(
+   'name' => 'Home décor', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_24);
+
+  $term_25 = (object) array(
+   'name' => 'Linens', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_25);
+
+  $term_26 = (object) array(
+   'name' => 'Bathroom Accessories', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_26);
+
+  $term_27 = (object) array(
+   'name' => 'House Keeping', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_27);
+
+  $term_28 = (object) array(
+   'name' => 'Drawing', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_28);
+
+  $term_29 = (object) array(
+   'name' => 'Collage', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_29);
+
+  $term_30 = (object) array(
+   'name' => 'Fiber Art', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_30);
+
+  $term_31 = (object) array(
+   'name' => 'Painting', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_31);
+
+  $term_32 = (object) array(
+   'name' => 'Photography', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_32);
+
+  $term_33 = (object) array(
+   'name' => 'Print', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_33);
+
+  $term_34 = (object) array(
+   'name' => 'Cultures and Trends', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_34);
+}
+
+/**
+ * Add sub eshop navigation vocab and terms
+ */
+function thp_shops_update_4() {
+  // Sub eshop navigation categories
+  $vocabulary = new stdClass();
+  $vocabulary->name = 'Sub eshop navigation';
+  $vocabulary->description = 'Sub eshop categories(not the leaf)';
+  $vocabulary->machine_name = 'sub_eshop_navigation';
+  taxonomy_vocabulary_save($vocabulary);
+  $vid = $vocabulary->vid;
+  variable_set('thehomepage_sub_eshop_navigation_vid', $vid);
+
+  $term_1 = (object) array(
+   'name' => 'Sofas', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_1);
+
+  $term_2 = (object) array(
+   'name' => 'Chairs', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_2);
+
+  $term_3 = (object) array(
+   'name' => 'Tables', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_3);
+
+  $term_4 = (object) array(
+   'name' => 'Beds', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_4);
+
+  $term_5 = (object) array(
+   'name' => 'Storages', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_5);
+
+  $term_6 = (object) array(
+   'name' => 'Faucets', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_6);
+
+  $term_7 = (object) array(
+   'name' => 'Drawing', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_7);
+
+  $term_8 = (object) array(
+   'name' => 'Collage', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_8);
+
+  $term_9 = (object) array(
+   'name' => 'Fiber Art', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_9);
+
+  $term_10 = (object) array(
+   'name' => 'Painting', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_10);
+
+  $term_11 = (object) array(
+   'name' => 'Photography', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_11);
+
+  $term_12 = (object) array(
+   'name' => 'Print', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_12);
+
+  $term_13 = (object) array(
+   'name' => 'Sculpture', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_13);
+
+  $term_14 = (object) array(
+   'name' => 'Cultures and trends', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_14);
+
+  $term_15 = (object) array(
+   'name' => 'Serving ware', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_15);
+
+  $term_16 = (object) array(
+   'name' => 'Cooking tools and gadgets', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_16);
+
+  $term_17 = (object) array(
+   'name' => 'Drinkware', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_17);
+
+  $term_18 = (object) array(
+   'name' => 'Dining decor', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_18);
+
+  $term_19 = (object) array(
+   'name' => 'Appliances', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_19);
+
+  $term_20 = (object) array(
+   'name' => 'Home Décor', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_20);
+
+  $term_21 = (object) array(
+   'name' => 'Lightings', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_21);
+
+  $term_22 = (object) array(
+   'name' => 'House Keeping', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_22);
+
+  $term_23 = (object) array(
+   'name' => 'Utilities', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_23);
+
+  $term_24 = (object) array(
+   'name' => 'Linens', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_24);
+}
+
+/**
+ * Add items vocab and terms
+ */
+function thp_shops_update_5() {
+  // Site items
+  $vocabulary = new stdClass();
+  $vocabulary->name = 'Items';
+  $vocabulary->description = 'Items categories (leaf)';
+  $vocabulary->machine_name = 'items_categories_navigation';
+  taxonomy_vocabulary_save($vocabulary);
+  $vid = $vocabulary->vid;
+  variable_set('thehomepage_site_items_vid', $vid);
+
+  $term_1 = (object) array(
+   'name' => 'Living sets', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_1);
+
+  $term_2 = (object) array(
+   'name' => 'Dressers', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_2);
+
+  $term_3 = (object) array(
+   'name' => 'Commodes', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_3);
+
+  $term_4 = (object) array(
+   'name' => 'Benches', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_4);
+
+  $term_5 = (object) array(
+   'name' => 'Sets', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_5);
+////////////////
+  $term_6 = (object) array(
+   'name' => 'Tables', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_6);
+  $term_7 = (object) array(
+   'name' => 'Chairs', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_7);
+  $term_8 = (object) array(
+   'name' => 'Buffets', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_8);
+  $term_9 = (object) array(
+   'name' => 'Chinaware Cabinet', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_9);
+  $term_10 = (object) array(
+   'name' => 'Table cloth, Runners and Napkins', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_10);
+  $term_11 = (object) array(
+   'name' => 'Kitchen Sets', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_11);
+  $term_12 = (object) array(
+   'name' => 'Organizing units and racks', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_12);
+  $term_13 = (object) array(
+   'name' => 'Kitchen counters', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_13);
+
+  $term_14 = (object) array(
+   'name' => 'Cabinets', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_14);
+
+  $term_15 = (object) array(
+   'name' => 'Toilets', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_15);
+
+  $term_16 = (object) array(
+   'name' => 'Vanity Accessories', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_16);
+
+  $term_17 = (object) array(
+   'name' => 'Calliagraphy', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_17);
+
+  $term_18 = (object) array(
+   'name' => 'Bathroom Vanities', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_18);
+
+  $term_19 = (object) array(
+   'name' => 'Tents', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_19);
+
+  $term_20 = (object) array(
+   'name' => 'Hammocks and Swings', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_20);
+
+  $term_21 = (object) array(
+   'name' => 'Games and Play sets', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_21);
+
+  $term_22 = (object) array(
+   'name' => 'Wall Paint', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_22);
+
+  $term_23 = (object) array(
+   'name' => 'Wallpaper and Cladding', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_23);
+
+  $term_24 = (object) array(
+   'name' => 'Parquet and H.D.F', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_24);
+
+  $term_25 = (object) array(
+   'name' => 'Porcelain', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_25);
+
+  $term_26 = (object) array(
+   'name' => 'Ceramic', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_26);
+
+  $term_27 = (object) array(
+   'name' => 'Marble', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_27);
+
+  $term_28 = (object) array(
+   'name' => 'Outdoor', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_28);
+
+  $term_29 = (object) array(
+   'name' => 'Carpets', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_29);
+
+  $term_30 = (object) array(
+   'name' => 'Windows', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_30);
+
+  $term_31 = (object) array(
+   'name' => 'Doors', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_31);
+
+  $term_32 = (object) array(
+   'name' => 'Cornices and Other Gypsum Element', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_32);
+
+  $term_33 = (object) array(
+   'name' => 'Bean Bags', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_33);
+
+  $term_34 = (object) array(
+   'name' => 'Beddings and blankets', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_34);
+
+  $term_35 = (object) array(
+   'name' => 'Sheets and Quilts', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_35);
+  
+ $term_36 = (object) array(
+   'name' => 'Bath Mats', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_36);
+  
+  $term_37 = (object) array(
+   'name' => 'Shower Curtains', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_37);
+
+  $term_38 = (object) array(
+   'name' => 'Towels', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_38);
+  
+  $term_39 = (object) array(
+   'name' => 'Kids linens', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_39);
+  
+  $term_40 = (object) array(
+   'name' => 'Pillows', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_40);
+
+  $term_41 = (object) array(
+   'name' => 'Mattresses', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_41);
+
+  $term_42 = (object) array(
+   'name' => 'Grills and toasters', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_42);
+
+  $term_43 = (object) array(
+   'name' => 'Blenders and Food Processors', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_43);
+  
+  $term_44 = (object) array(
+   'name' => 'Kettles & Coffee Makers', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_44);
+
+  $term_45 = (object) array(
+   'name' => 'Ovens and microwaves', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_45);
+
+  $term_46 = (object) array(
+   'name' => 'Vaccums', 
+   'description' => '',
+   'vid' => $vid,
+  ); 
+  taxonomy_term_save($term_46);
+}
+
+/**
+ * Add materials vocabs and terms
+ */
+function thp_shops_update_6 () {
+   // Structure material
+  $vocabulary = new stdClass();
+  $vocabulary->name = 'Structure Material';
+  $vocabulary->description = 'Structure material';
+  $vocabulary->machine_name = 'structure_material';
+  taxonomy_vocabulary_save($vocabulary);
+  $vid_1 = $vocabulary->vid;
+  variable_set('thehomepage_structure_material_vid', $vid_1);
+
+  $term_1 = (object) array(
+   'name' => 'Wood', 
+   'description' => '',
+   'vid' => $vid_1,
+  ); 
+  taxonomy_term_save($term_1);
+
+  $term_2 = (object) array(
+   'name' => 'Steel', 
+   'description' => '',
+   'vid' => $vid_1,
+  ); 
+  taxonomy_term_save($term_2);
+
+  $term_3 = (object) array(
+   'name' => 'Plastic', 
+   'description' => '',
+   'vid' => $vid_1,
+  ); 
+  taxonomy_term_save($term_3);
+
+  $term_4 = (object) array(
+   'name' => 'Glass', 
+   'description' => '',
+   'vid' => $vid_1,
+  ); 
+  taxonomy_term_save($term_4);
+
+  $term_5 = (object) array(
+   'name' => 'Pottery', 
+   'description' => '',
+   'vid' => $vid_1,
+  ); 
+  taxonomy_term_save($term_5);
+
+  $term_6 = (object) array(
+   'name' => 'Ceramic', 
+   'description' => '',
+   'vid' => $vid_1,
+  ); 
+  taxonomy_term_save($term_6);
+
+  $term_7 = (object) array(
+   'name' => 'Chinaware', 
+   'description' => '',
+   'vid' => $vid_1,
+  ); 
+  taxonomy_term_save($term_7);
+
+  //////////////////////////// 2 ///////////////////////
+  // Main navigation categories
+  $vocabulary = new stdClass();
+  $vocabulary->name = 'Finish material';
+  $vocabulary->description = 'Finish material';
+  $vocabulary->machine_name = 'finish_material';
+  taxonomy_vocabulary_save($vocabulary);
+  $vid_2 = $vocabulary->vid;
+  variable_set('thehomepage_finish_material_vid', $vid_2);
+
+  $term_11 = (object) array(
+   'name' => 'Glossy', 
+   'description' => '',
+   'vid' => $vid_2,
+  ); 
+  taxonomy_term_save($term_11);
+
+  $term_12 = (object) array(
+   'name' => 'Polished', 
+   'description' => '',
+   'vid' => $vid_2,
+  ); 
+  taxonomy_term_save($term_12);
+
+  $term_13 = (object) array(
+   'name' => 'Golden', 
+   'description' => '',
+   'vid' => $vid_2,
+  ); 
+  taxonomy_term_save($term_13);
+
+  $term_14 = (object) array(
+   'name' => 'Cherry', 
+   'description' => '',
+   'vid' => $vid_2,
+  ); 
+  taxonomy_term_save($term_14);
+
+  $term_15 = (object) array(
+   'name' => 'Bronze', 
+   'description' => '',
+   'vid' => $vid_2,
+  ); 
+  taxonomy_term_save($term_15);
+
+  $term_16 = (object) array(
+   'name' => 'Silver', 
+   'description' => '',
+   'vid' => $vid_2,
+  ); 
+  taxonomy_term_save($term_16);
+
+  $term_17 = (object) array(
+   'name' => 'Raw', 
+   'description' => '',
+   'vid' => $vid_2,
+  ); 
+  taxonomy_term_save($term_17);
+  
+  /////////////////////////////////////////// 3 ///////////////////////////
+  
+  // Fabric materials
+  $vocabulary = new stdClass();
+  $vocabulary->name = 'Fabric material';
+  $vocabulary->description = 'Fabric materials';
+  $vocabulary->machine_name = 'fabric_material';
+  taxonomy_vocabulary_save($vocabulary);
+  $vid_3 = $vocabulary->vid;
+  variable_set('thehomepage_fabric_material_vid', $vid_3);
+
+  $term_21 = (object) array(
+   'name' => 'Linen', 
+   'description' => '',
+   'vid' => $vid_3,
+  ); 
+  taxonomy_term_save($term_21);
+
+  $term_22 = (object) array(
+   'name' => 'Cotton', 
+   'description' => '',
+   'vid' => $vid_3,
+  ); 
+  taxonomy_term_save($term_22);
+
+  $term_23 = (object) array(
+   'name' => 'Leather', 
+   'description' => '',
+   'vid' => $vid_3,
+  ); 
+  taxonomy_term_save($term_23);
+
+  $term_24 = (object) array(
+   'name' => 'Velvet', 
+   'description' => '',
+   'vid' => $vid_3,
+  ); 
+  taxonomy_term_save($term_24);
+
+  $term_25 = (object) array(
+   'name' => 'Silk', 
+   'description' => '',
+   'vid' => $vid_3,
+  ); 
+  taxonomy_term_save($term_25);
+
+  $term_26 = (object) array(
+   'name' => 'Blended', 
+   'description' => '',
+   'vid' => $vid_3,
+  ); 
+  taxonomy_term_save($term_26);
+
+  $term_27 = (object) array(
+   'name' => 'Water Proof', 
+   'description' => '',
+   'vid' => $vid_3,
+  ); 
+  taxonomy_term_save($term_27);
+}
+
+/**
+ * Create parent table for main navigation categories
+ */
+function thp_shops_update_7 () {
+
+  // Main navigation categories table
+  $schema['thp_shops_main_navigation_parents'] = array(
+    'description' => t('Parents relation for the main navigation categories'),
+    'fields' => array(      
+      'tid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The term tid.',
+      ),
+       'parent' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0, 
+        'description' => 'Parent tid',
+      ),  
+    ), 
+    'indexes' => array('tid_parent' => array('tid', 'parent')),
+  );
+  db_create_table('thp_shops_main_navigation_parents', $schema['thp_shops_main_navigation_parents']);
+}
+
+/**
+ * Create parent table for eshop navigation categories
+ */
+function thp_shops_update_8 () {
+
+  // Main navigation categories table
+  $schema['thp_shops_eshop_navigation_parents'] = array(
+    'description' => t('Parents relation for the eshop navigation categories'),
+    'fields' => array(      
+      'tid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The term tid.',
+      ),
+       'parent' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0, 
+        'description' => 'Parent tid',
+      ),
+    ),   
+    'indexes' => array('tid_parent' => array('tid', 'parent')),
+  );
+  db_create_table('thp_shops_eshop_navigation_parents', $schema['thp_shops_eshop_navigation_parents']);
+}
+
+/**
+ * Alter field shop category to make it char not in to allow multiple values
+ */
+function thp_shops_update_9() {
+  // Create the definition for the field
+  $shop_category = array(
+    'type' => 'varchar',
+    'length' => '512',
+    'default' => '',
+  );
+  db_change_field('thp_shops_register', 'shop_category', 'shop_category', $shop_category);
+}
+
+/**
+ * Alter table thp_shops_register to add date
+ */
+function thp_shops_update_10() {
+  $spec = array(
+    'type' => 'varchar',
+    'description' => "added_time",
+    'length' => 512,
+    'not null' => FALSE,
+  );
+  db_add_field( 'thp_shops_register', 'added_time', $spec);
+}
+
+/**
+ * Create relation table for materials (Main categories)
+ */
+function thp_shops_update_11 () {
+
+  // Main navigation categories table
+  $schema['thp_shops_main_navigation_materials_relation'] = array(
+    'description' => t('Main categories materials relation'),
+    'fields' => array(      
+      'tid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The term tid.',
+      ),
+       'material_tid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0, 
+        'description' => 'Material vid',
+      ),  
+    ), 
+    'primary key' => array('tid', 'material_tid'),
+    'indexes' => array('tid_material' => array('tid', 'material_tid')),
+  );
+  db_create_table('thp_shops_main_navigation_materials_relation', $schema['thp_shops_main_navigation_materials_relation']);
+}
+
+
+/**
+ * Create relation table for materials (Eshop categories)
+ */
+function thp_shops_update_12 () {
+
+  // Eshop navigation categories table
+  $schema['thp_shops_eshop_navigation_materials_relation'] = array(
+    'description' => t('Eshop categories materials relation'),
+    'fields' => array(      
+      'tid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The term tid.',
+      ),
+      'material_tid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0, 
+        'description' => 'Material vid',
+      ),  
+    ), 
+   'primary key' => array('tid', 'material_tid'),
+   'indexes' => array('tid_material' => array('tid', 'material_tid')),
+  );
+  db_create_table('thp_shops_eshop_navigation_materials_relation', $schema['thp_shops_eshop_navigation_materials_relation']);
+}
+

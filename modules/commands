@@ -1,0 +1,281 @@
+GREP:
+grep -inr "something" *
+
+SYMBOLIC LINK:
+ln -s /my/original/file /my/new/file/link
+
+To determine symlinks:
+ls -la
+
+
+SEARCH BACKWARD:
+CTRL-R
+
+CANCEL A COMMAND:
+CTRL-C
+
+FIND FILES:
+find . -name 'myfile_name.extension'
+
+DELETE FILES BASED ON EXTENSION:
+find . -name '*.extension' -exec rm -rf {} \;
+
+GIT COMMIT AND PUSH:
+git commit -a -m 'My message' && git push origin
+
+REPLACE A WORD IN MANY FILES:
+for i in `grep -inr 'my_old_word' *`; do echo "Replacing in $i..."; sed -i -e 's/my_old_word/my_new_word/gi' $i; done 
+
+Import database file in your database
+sudo mysql -uroot jamaluk_live < Desktop/jamaluk_live.sql
+
+
+drush --uri=http://jamaluk.omnia.edc/pressflow/src vget mediacenter_log
+
+
+drush --uri=http://jamaluk.omnia.edc/pressflow/src eval "_mediacenter_load_client();mediacenter_synchronize();"
+
+
+sudo tail -f /var/log/apache2/error.log
+
+// To Open a window for the folder as a root
+sudo nautilus .
+
+
+// To drop and add jamaluk pressflow database
+omnia.ibrahim@omnia:/tmp$ echo "drop database jamaluk_pressflow; create database jamaluk_pressflow;" | mysql && mysql -uroot jamaluk_pressflow < jamaluk_pressflow.sql 
+
+// Git with tags
+ git tag -l
+ git tag -a hdbdshbds
+ git  push --tags
+
+// To append a change in a commit
+ git commit --append
+ 
+ // git stash
+ git stash save anyname // To move away all local uncommitted changes and give it a name
+ git stash pop anyname // to retrieve changes   
+
+// git commands
+  git +tab +tab
+  
+  
+// To run new drush functions in jamaluk
+drush -l http://jamaluk.omnia.edc/pressflow/src mct
+
+// To tar a file/folder
+tar zcf folder_name.tar.gz source_file
+
+// To untar a folder
+tar zxf folder_name.tar.gz
+
+// to give write permission to all groups for a folder
+chmod a+w files/
+
+// to preview permissions 
+ls -l
+
+// Database dump
+sudo mysqldump mynono_prod > mynono_prod_5_7_2010.sql
+
+// To select values from table and save it in a file from mysql
+# mysql -u username -ppassword database -e "SELECT * INTO OUTFILE '/tmp/filename.csv'  FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"'  LINES TERMINATED BY '\r\n' FROM table;"
+
+username is your mysql username
+password is your mysql password
+database is your mysql database
+table is the table you want to export
+
+
+
+// scp command
+scp omar.abdelwahab@hawaaworld.com:/home/omar.abdelwahab/acookweb.tar.gz .
+
+// to know size and date
+ls -lha
+
+//to know folder size
+
+du -hs /path/to/folder
+
+
+// To act as root
+sudo -i -H
+
+// CLone repo
+git clone gitosis@git.edc:yebab/development.git
+
+
+grant all privileges on  yebab_stage_16_9_2010.* to yebab_user@localhost
+
+To add new ssh for a server in order to use it in git :  /home/omnia.ibrahim/.ssh
+
+
+to CHeck server space:
+
+df -h
+
+
+To check time server is up and running
+
+uptime
+
+to know php version 
+
+dpkg -l | grep php
+
+to create an apache alias for folder use: (inside /etc/apache2/sites-available)
+
+     Alias /forums /var/www/yebab-staging/upload
+     
+To restart apache
+
+/etc/init.d/apache2 restart
+
+To rsync folders
+
+rsync -a  /path/to/source/ /path/to/destination/
+
+to rsync between servers where v to show changes on screen
+(include back slash at the end to indicate that we want to move content not actual folders)
+ rsync -rvHP --update -e  ssh /var/www/yebab/drupal/sites/default/files/ root@31.222.189.71:/srv/www/yebab/drupal/sites/default/files/
+
+To drop tables like certain prefix use:
+
+SELECT CONCAT( 'DROP TABLE ', GROUP_CONCAT(table_name) , ';' ) 
+    AS statement FROM information_schema.tables 
+    WHERE table_schema = 'yebab_staging' AND table_name LIKE 'vbulletin_%';
+
+To Install virtual box
+
+sudo apt-get install virtualbox-ose
+
+
+To restart mysql
+
+/etc/init.d/mysql restart
+
+show process list in mysql
+
+SHOW FULL PROCESSLIST
+
+
+To know appache error:
+go to /var/log/apache2
+
+and write tail error.log
+
+to define the number of lines to print use trail -n 50 tail error.log
+
+
+In cron tab to restart every hour
+
+00 */1 * * *  /bin/sh /srv/yebab_restart.sh > /home/omnia.ibrahim/yebab_restart.log 2>&1
+
+
+To check if mail server is running
+
+/etc/init.d/postfix status
+
+To check if apache is running
+
+/etc/init.d/appache2 status
+
+
+
+To know mysql status and performance:
+
+mysqltuner
+
+
+To block an IP:
+
+sudo ufw deny from 192.16.1.245
+
+To check what is blocked: 
+
+ufw status
+
+To insert at the top of ufw 
+
+ufw insert 1 deny from <IP Address>
+
+to deny from ip range: (from 0 to 255)
+
+sudo ufw allow from 10.0.0.0/24
+
+to delete rule
+sudo ufw delete <rule type> from <ip address> to any port <port number>
+
+To know the free memory use:
+
+free -m
+
+Perl script to calculate apache:
+
+apachebuddy
+
+Restart varnish
+/etc/init.d/varnish restart
+
+To change restart time in lsync between two servers
+/etc/lsyncd.lau
+
+To change root password
+sudo passwd
+
+// To delete git garbage collection
+git gc
+
+
+// To know the process from process ID use
+strace -p PROCESSID
+
+// to know system messages
+sudo dmesg
+
+// When migrate database and there is an unserialze error (its a variable like "siteoffline" not configured properly, use the following to debug)
+// if ($cached = cache_get('variables', 'cache')) {
+//   $variables = $cached->data;
+// }
+// else {
+    $result = db_query('SELECT * FROM {variable}');
+    while ($variable = db_fetch_object($result)) {
+    
+      $variables[$variable->name] = @unserialize($variable->value);
+     
+      if ($variables[$variable->name] === FALSE) {
+       print "<hr/>Unserialize Error for variable:". $variable->name . '='. $variables[$variable->name] . "<br/>". $variable->value;
+      }
+    }
+    die;
+    cache_set('variables', $variables);
+// }
+
+
+// To fix headers issue when migrate: change serialize in site offline variable in variable table in database
+
+
+// To change encoding in mysql to arabic use
+SET NAMES 'utf8'
+
+// To change password
+ SET PASSWORD FOR 'yebab_live'@'10.177.66.132' = PASSWORD('secapo91');
+ 
+ FLUSH PRIVILEGES
+ 
+ 
+.git:
+
+[remote "new"]
+	url = root@31.222.189.71:/srv/git/yebab.git
+  fetch = +refs/heads/*:refs/remotes/new/*
+  
+[remote "newrack"]
+	url = root@31.222.162.240:/srv/git/yebab.git
+  fetch = +refs/heads/*:refs/remotes/newrack/*
+
+solr location:
+
+/usr/share/solr/example

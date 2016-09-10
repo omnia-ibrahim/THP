@@ -1,0 +1,292 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function thp_designers_install() {
+  // Create new role designer
+  $role = new stdClass();
+  $role->name = 'designer';
+  user_role_save($role);
+ 
+  $t = get_t();
+  // Create Designs Album content type
+  $album_type = array(
+    'type' => "design_album",
+    'name' => $t('Album'),
+    'base' => 'node_content',
+    'description' => $t('Designs Album.'),
+    'title_label' => $t('Album name'),
+    'custom' => TRUE,
+  );
+  $content_type = node_type_set_defaults($album_type);
+  node_add_body_field($content_type, $t('Description'));
+  node_type_save($content_type);
+
+  $design_type = array(
+    'type' => "design_image",
+    'name' => $t('Design'),
+    'base' => 'node_content',
+    'description' => $t('A design image.'),
+    'title_label' => $t('Image name'),
+    'custom' => TRUE,
+  );
+  $content_type = node_type_set_defaults($design_type);
+  node_add_body_field($content_type, $t('Caption'));
+  node_type_save($content_type);
+
+}
+
+/**
+ * Implements hook_schema().
+ */
+function thp_designers_schema() {
+  $schema['thp_designers_albums_design'] = array(
+    'fields' => array(
+      'album_nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'design_nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('album_nid', 'design_nid'),
+  );
+  return $schema;
+}
+
+/**
+ * For adding style terms
+ */
+function thp_designers_update_1() {
+  //style terms
+  $vid = variable_get('thehomepage_profile_style_vid', '');
+  $term_1 = (object) array(
+   'name' => 'Contemporary', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_1);
+
+  $term_2 = (object) array(
+   'name' => 'Modern', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_2);
+
+  $term_3 = (object) array(
+   'name' => 'Minimalist', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_3);
+
+  $term_4 = (object) array(
+   'name' => 'Classic', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_4);
+
+  $term_5 = (object) array(
+   'name' => 'Oriental', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_5);
+
+  $term_6 = (object) array(
+   'name' => 'Authentic', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_6);
+
+  $term_7 = (object) array(
+   'name' => 'Traditional', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_7);
+
+  $term_8 = (object) array(
+   'name' => 'Coastal', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_8);
+
+  $term_9 = (object) array(
+   'name' => 'Vintage', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_9);
+
+  $term_10 = (object) array(
+   'name' => 'Industrial', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_10);
+
+  $term_11 = (object) array(
+   'name' => 'Pop', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_11);
+
+  $term_12 = (object) array(
+   'name' => 'Rustic', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_12);
+
+  $term_13 = (object) array(
+   'name' => 'Art Deco', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_13);
+
+  $term_14 = (object) array(
+   'name' => 'Eclectic', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_14);
+
+  $term_15 = (object) array(
+   'name' => 'Beach Life', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_15);
+}
+
+/**
+ * for adding mood vocab and its terms
+ */
+function thp_designers_update_2() {
+  // Mood filter
+  $vocabulary = new stdClass();
+  $vocabulary->name = 'Mood';
+  $vocabulary->description = 'Mood';
+  $vocabulary->machine_name = 'mood_filter';
+  taxonomy_vocabulary_save($vocabulary);
+  $vid = $vocabulary->vid;
+  variable_set('thehomepage_mood_filter_vid', $vid);
+
+  //mood terms
+  $term_1 = (object) array(
+   'name' => 'Warm', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_1);
+
+  $term_2 = (object) array(
+   'name' => 'Cheerful', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_2);
+
+  $term_3 = (object) array(
+   'name' => 'Calming', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_3);
+
+  $term_4 = (object) array(
+   'name' => 'Bold', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_4);
+
+  $term_5 = (object) array(
+   'name' => 'Romantic', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_5);
+
+  $term_6 = (object) array(
+   'name' => 'Luxurious', 
+   'description' => '',
+   'vid' => $vid,
+   ); 
+   taxonomy_term_save($term_6);
+}
+/**
+ * Create table for saving sets data
+ */
+function thp_designers_update_3 () {
+
+  // Sets data table
+  $schema['thp_designers_sets_data'] = array(
+    'description' => t('Data of a set'),
+    'fields' => array(      
+      'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The node nid.',
+      ),
+      'image_nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The dragged image nid.',
+      ),
+      'main_div_style' => array(
+         'type' => 'varchar',
+         'length' => '512',
+         'default' => '',
+         'description' => 'Main div style.',
+        ),  
+      'second_div_style' => array(
+         'type' => 'varchar',
+         'length' => '512',
+         'default' => '',
+         'description' => 'Second div style.',
+        ),  
+      'img_style' => array(
+         'type' => 'varchar',
+         'length' => '512',
+         'default' => '',
+         'description' => 'Image style.',
+        ),  
+      'img_src' => array(
+         'type' => 'varchar',
+         'length' => '512',
+         'default' => '',
+         'description' => 'Image src.',
+        ),  
+    ), 
+    'indexes' => array('nid_image' => array('nid', 'image_nid')),
+  );
+  db_create_table('thp_designers_sets_data', $schema['thp_designers_sets_data']);
+}
+
+
+/**
+ *
+ */
+function thp_designers_uninstall() {
+  cache_clear_all();
+}
+

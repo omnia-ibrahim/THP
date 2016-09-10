@@ -1,0 +1,950 @@
+<?php
+
+/**
+ * hook_menu
+ */
+function thp_designers_menu() {
+
+  $items['whitebg'] = array(
+    'title' => 'Profile type',
+    'page callback' => 'thp_designers_image_background_2',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['sets'] = array(
+    'page callback' => 'thp_designers_draggable',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+   );
+
+  $items['create_set'] = array(
+    'page callback' => 'thp_designers_create_set',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+   );
+
+  $items['save_data_image'] = array(
+    'page callback' => 'thp_designers_save_data_image',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+   ); 
+
+  $items['save_file'] = array(
+    'page callback' => 'thp_designers_save_file',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+   );
+
+  $items['color_picker'] = array(
+    'page callback' => 'thp_designers_color_picker',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+   ); 
+  return $items;
+}
+
+/**
+ *
+ */
+function thp_designers_form_alter(&$form, &$form_state, $form_id) {
+  global $user;
+  // page TODO: save image inside node
+  if($form_id == 'page_node_form') {
+    drupal_add_css(drupal_get_path('theme', 'thehome_theme') . '/js/dropzone/css/basic.css');
+    drupal_add_css(drupal_get_path('theme', 'thehome_theme') . '/js/dropzone/css/dropzone.css');
+ // drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/jquery.min.js');
+    drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/dropzone/dropzone.js');
+    drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/thehome_theme.js');
+
+  $form['#attributes']['class'][] = 'dropzone';  
+//  $build_id = $form['#build_id'];
+  $_SESSION['fid'][] = '';  
+  if (!empty($_FILES)) {
+      $tempFile = $_FILES['file']['tmp_name'];          //3             
+
+      $targetPath = variable_get('file_public_path', conf_path() . '/files/uploads/') ;  //4
+
+      $targetFile =  $targetPath. $_FILES['file']['name'];  //5
+     // move_uploaded_file($tempFile, $targetFile); //6
+      $file = file_save_data(file_get_contents($tempFile), 'public://' . $_FILES['file']['name'] ); 
+
+      //$file = file_save_data(file_get_contents($image_url), file_default_scheme().'://products_images/'.basename($image_url));
+      $file->uid = $user->uid;
+   /*  $_POST['field_page_image'][LANGUAGE_NONE][0][] =  array('fid'=> $file->fid);
+     $form_state['values']['field_page_image'][LANGUAGE_NONE][0] =  array('fid'=> 196);
+    $form_state['field_page_image'][LANGUAGE_NONE][0] =  array('fid'=> 196);
+    $form_state['storage']['field_page_image'][LANGUAGE_NONE][0] =  array('fid'=> 196);
+   $form_state['field_page_image'] = array('fid'=> 196);
+     $form["field_page_image"]['#default_value'] = array('fid'=> $file->fid);
+     $form["field_page_image"][LANGUAGE_NONE][0] = array('fid'=> $file->fid);
+   */
+       $_SESSION['fid'][] = $file->fid; 
+      //$form_state['values']['field_page_image'] = $files;
+      //$form['#node']['field_page_image'][] = $_FILES;    
+   }
+
+     //  $form['test_upload']['#attributes']['class'][] = 'dropzone';
+    $form['#submit'][] = 'thp_designers_form_submit';
+  }
+
+  // Image
+  if($form_id == 'design_image_node_form') {
+
+    $image_name = arg(3);
+    if (!empty($image_name)) {
+
+      if (arg(4) == 'false') {
+         $form['options']['status']['#default_value'] = 0;
+      }
+      // unset($form['field_design_image']);
+      $form['set_image'] = array(
+         '#markup' => theme('image', array('path' => 'sites/default/files/' . $image_name)),
+         '#weight' => -10,
+      );
+     $form['set_image_uri'] = array(
+       '#type' => 'hidden',
+       '#value' => 'sites/default/files/' . $image_name,
+     );
+     $form['set_fields'] = array (
+       '#type' => 'fieldset',
+       '#tree' => TRUE,
+       '#collapsible' => TRUE,
+      );
+      foreach ($_POST as $key => $value) {
+
+        $field_name = explode("_", $key);
+        if ($field_name[0] == 'src') {
+          $form['set_fields'][end($field_name)]['src_value_' . $key] = array(
+            '#type' => 'textarea',
+            '#value' => $value,
+          );
+        } elseif ($field_name[0] == 'style') {
+            $form['set_fields'][end($field_name)]['style_value_' . $key] = array(
+             '#type' => 'textarea',
+             '#value' => $value,
+          );
+        }
+         elseif ($field_name[0] == 'nodeid') {
+            $form['set_fields'][end($field_name)]['nodeid_value_' . $key] = array(
+             '#type' => 'textarea',
+             '#value' => end(explode("_", $value)),
+          );
+        }
+        elseif ($field_name[0] == 'wrapperstyle') {
+            $form['set_fields'][end($field_name)]['wrapper_style_value_' . $key] = array(
+             '#type' => 'textarea',
+             '#value' => end(explode("_", $value)),
+          );
+        }
+        elseif ($field_name[0] == 'imgstyle') {
+            $form['set_fields'][end($field_name)]['img_style_value_' . $key] = array(
+             '#type' => 'textarea',
+             '#value' => end(explode("_", $value)),
+          );
+        }
+      }
+
+    }
+    drupal_add_js(drupal_get_path('module', 'thp_designers') . '/thp_designers.js');
+    $form['design_album_field'] = array(
+      '#type' => 'select',
+      '#title' => 'Album',
+      '#required' => true,
+      '#default_value' => isset($form['#node']->design_album_field)? $form['#node']->design_album_field : '',
+      '#options' => thp_designers_user_albums($user->uid),
+    );
+
+   /*
+    foreach ($form['field_design_color']['und']['#options'] as $key => $value) {
+      $form['field_design_color']['und']['#options'][$key] =  "<span id='color_select_field' color = " . $value . ";'>" . "<div style='width: 40px; height: 40px; border: 1px solid #dddddd; background:" . $value . ";'>ddd</div>" . "ddd</span>"; 
+    }
+    */
+    $form['field_design_image']['#weight'] = -100;
+    $form['field_design_image']['#prefix'] = "<div class='image_inside_album'>";
+    $form['field_design_image']['#suffix'] = "</div>";
+//  thp_search_html_color( $term_name)
+/*
+    unset($form['field_design_image']);
+
+    $form['custom_design_image'] = array(
+      '#markup' => "<div class='image_inside_album'>" . theme('image', array('path' => file_load($form['#node']->field_design_image['und'][0]['fid'])->uri)) . "</div>",
+      '#weight' => -100, 
+   );
+  */ 
+$form['actions']['submit']['#submit'][] = 'thp_designers_design_set_submit'; 
+//      $form['#submit'][] = 'thp_designers_design_set_submit';  
+
+  }
+}
+
+/**
+ *
+ */
+function thp_designers_design_set_submit ($form, &$form_state) {
+  $url = 'sets';
+  if (module_exists('overlay')) {
+    unset($_GET['destination']);
+    overlay_close_dialog($url, array('external' => TRUE));
+    $form_state['redirect'] = FALSE;
+  }
+}
+
+/** 
+ *
+ */ 
+function thp_designers_form_submit ($form, &$form_state) {
+ //$form_state['values']['field_page_image'][LANGUAGE_NONE][] = array ('fid' => 196);
+  $counter = 1; 
+ // TODO
+ // $build_id = $form['#build_id'];
+  foreach($_SESSION['fid'] as $fid) {
+    $form_state['values']['field_page_image'][LANGUAGE_NONE][] =  array('fid'=> $fid, 'weight'=> $counter ++);
+  }
+  $_SESSION['fid'] = array();
+  unset($_SESSION['fid']);
+  //$form_state['values']['field_page_image'][LANGUAGE_NONE][0]['value'][] =  array($fid=> 196);
+  //print_r($form);
+  // exit();
+}
+
+/**
+ *
+ */
+function thp_designers_node_insert($node) {
+  if ($node->type == 'design_album') {
+    foreach ($node->field_album_images['und'] as $file) {
+      $body_text = '';
+      $design_node = new stdClass();
+      $design_node->type = 'design_image';
+      node_object_prepare($design_node);
+      $added_file = file_load($file['fid']);
+      $design_node->title    = $added_file->filename;
+      $design_node->language = LANGUAGE_NONE;
+      $design_node-> status = 0;
+      $design_node->body[$design_node->language][0]['value']   = $body_text;
+      $design_node->body[$design_node->language][0]['summary'] = text_summary($body_text);
+      $design_node->body[$design_node->language][0]['format']  = 'filtered_html';
+
+      // $path = 'content/my-lipsum-' . date('YmdHis');
+      // $node->path = array('alias' => $path);
+      // $added_file = file_load($file['fid']);
+      $design_node->field_design_image[LANGUAGE_NONE][0] = (array)$added_file; 
+      node_save($design_node);  
+      $query = db_insert('thp_designers_albums_design')->fields(array('album_nid', 'design_nid'));
+      $query->values(array(
+          'album_nid' => $node->nid,
+          'design_nid' => $design_node->nid,
+      ));
+      $query->execute();
+    }
+  }
+  // Case design image
+  if ($node->type == 'design_image') {
+    //
+      foreach ($node->set_fields as $key => $value) {
+          
+          $image_nid = '';
+          $wrapper = '';
+          $img_style = '';
+          $main_style = '';
+          $img_src = '';
+        foreach ($value as $k => $v) {
+          $field_name = explode('_', $k);
+          if ($field_name[0] == 'nodeid') {
+            $image_nid = $v;
+          }
+          if ($field_name[0] == 'wrapper') {
+            $wrapper = $v;        
+          }
+          if ($field_name[0] == 'src') {
+            $img_src = $v; 
+          }
+          if ($field_name[0] == 'style') {
+             $main_style = $v;
+          }
+          if ($field_name[0] == 'img') {
+            $img_style = $v;
+          }
+          if (!empty ($image_nid) && !empty ($wrapper) && !empty ($img_src) && !empty ($main_style) && !empty ($img_style)) {
+            $query = db_insert('thp_designers_sets_data')->fields(array('nid', 'image_nid', 'main_div_style', 'second_div_style', 'img_style', 'img_src'));
+            $query->values(array(
+             'nid' => $node->nid,
+             'image_nid' => $image_nid,
+             'main_div_style' => $main_style,
+             'second_div_style' => $wrapper,
+             'img_style' => $img_style,
+             'img_src' => $img_src,
+            ));
+            $query->execute(); 
+          }
+         }
+
+       }
+  ///
+
+
+    if (isset($node->design_album_field)) {
+      $uploaded_file = file_load($node->field_design_image['und'][0]['fid']);
+      $album_nid = (int)$node->design_album_field;
+      $album_node = node_load($album_nid);
+      $album_node->field_album_images['und'][] = (array) $uploaded_file;
+      node_save((object)$album_node);
+      $query = db_insert('thp_designers_albums_design')->fields(array('album_nid', 'design_nid'));
+      $query->values(array(
+        'album_nid' => $album_nid,
+        'design_nid' => $node->nid,
+      ));
+      $query->execute();   
+/**
+      // Insert image with background image
+       $old_file = $uploaded_file->uri;
+       $file_name = explode ('.', $uploaded_file->filename);
+       $newfile = 'sites/default/files/' . $file_name[0] . '_trans.png';
+       if (copy($old_file, $newfile)) {
+         // Create managed File object and associate with Image field.
+         $file = (object) array(
+          'uid' => 1,
+          'uri' => $newfile,//$filepath,
+          'filemime' => file_get_mimetype($newfile),
+          'status' => 1,
+        );
+      // We save the file to the root of the files directory.
+      $file = file_copy($file, 'public://');
+      $node->field_transparent_image[LANGUAGE_NONE][0] = (array)file_load($file->fid);   
+
+       }
+*/
+    }
+  }  
+}
+
+/**
+ * Hook_node_load
+ */
+function thp_designers_node_load($nodes, $types) {
+  foreach($types as $type) {
+    if ($type == 'design_image') {
+      $result = db_query("SELECT * FROM {thp_designers_albums_design} WHERE design_nid IN (:nids)", array(':nids' => array_keys($nodes)));
+      foreach ($result as $record) {
+        $nodes[$record->design_nid]->design_album_field = $record->album_nid;
+      }
+    }
+  }
+}
+
+/**
+ *
+ */
+function thp_designers_user_albums($uid) {
+  $query = db_query('SELECT nid, title FROM {node} WHERE uid =:uid AND type=:type', array(':uid' => $uid, ':type' => "design_album"));
+  $result = $query->fetchAll();
+  $albums = array();
+  foreach ($result as $record) {  
+    $albums [$record->nid] = $record ->title;
+  }
+  return $albums;
+}
+
+/**
+ *
+ */
+function thp_designers_node_presave($node) {
+  
+  if($node->type == 'design_image') {
+
+   if (!empty($node->set_image_uri)) {
+     $file = (object) array(
+        'uid' => $node->uid,
+        'uri' => $node->set_image_uri,//$filepath,
+        'filemime' => file_get_mimetype($node->set_image_uri),
+        'status' => 1,
+      );
+      // We save the file to the root of the files directory.
+      $file = file_copy($file, 'public://');
+      $node->field_design_image['und'][0] = (array)file_load($file->fid);            
+    }
+    if (empty($node -> field_design_color['und'])) {    
+      $tid = array();
+      $color_vid = variable_get('thehomepage_color_vid', '');
+      include_once( 'sites/all/libraries/Colors-Of-Image/colorsofimage.class.php');
+      $output = '';
+       $image_1 = file_load($node-> field_design_image['und'][0]['fid'])->uri;
+       // initiate with image
+      $image = new ColorsOfImage($image_1, 5, 3);
+      // get the prominent colors
+      $colors = $image->getProminentColors(); // array( '#FFFDD', ... )
+      foreach ($colors as $color) {
+        $matched_color = convertToClosest(str_replace('#', '', $color));
+        $term = reset(taxonomy_get_term_by_name($matched_color));
+        $tid ['tid'] = $term->tid;
+        $node -> field_design_color['und'][] = $tid;
+      }
+   }
+    // Insert image with background image
+      $uploaded_file = file_load($node->field_design_image['und'][0]['fid']);
+       $old_file = $uploaded_file->uri;
+       $file_name = explode ('.', $uploaded_file->filename);
+       if (end($file_name) == 'png') {
+         $newfile = 'sites/default/files/' . $file_name[0] . '_trans.png';
+         if (copy($old_file, $newfile)) {
+           thp_designers_image_background_2($old_file, $newfile);
+           // Create managed File object and associate with Image field.
+           $file = (object) array(
+            'uid' => $node->uid,
+            'uri' => $newfile,//$filepath,
+            'filemime' => file_get_mimetype($newfile),
+            'status' => 1,
+          );
+        // We save the file to the root of the files directory.
+        $file = file_copy($file, 'public://');
+        $node->field_transparent_image[LANGUAGE_NONE][0] = (array)file_load($file->fid);   
+      }
+    }
+
+  }
+}
+
+/**
+ *
+ */
+function thp_designers_node_update($node) {
+  if($node->type == 'design_image') {      
+    if ($node->changed != $node->created) {    
+      db_query("UPDATE {node} SET status = 1 WHERE nid =:nid", array(':nid' => $node->nid));
+      db_query("UPDATE {node_revision} SET status = 1 WHERE nid =:nid", array(':nid' => $node->nid));
+    }
+    if (isset($node->design_album_field)) {
+      $album_nid = (int)$node->design_album_field;
+ 
+      db_delete('thp_designers_albums_design')
+          ->condition('album_nid', $album_nid)
+          ->condition('design_nid', $node->nid)
+          ->execute();       
+
+      $exists_albums = db_query('SELECT album_nid FROM {thp_designers_albums_design} WHERE design_nid = :design_nid', array(':design_nid' => $node->nid));
+      foreach($exists_albums as $exists_album) {
+        
+         db_delete('thp_designers_albums_design')
+          ->condition('album_nid', $exists_album->album_nid)
+          ->condition('design_nid', $node->nid)
+          ->execute();       
+
+        db_delete('field_data_field_album_images')
+          ->condition('entity_id', $exists_album->album_nid)
+          ->condition('field_album_images_fid', $node->field_design_image['und'][0]['fid'])
+          ->execute();
+
+        db_delete('field_revision_field_album_images')
+          ->condition('entity_id', $exists_album->album_nid)
+          ->condition('field_album_images_fid', $node->field_design_image['und'][0]['fid'])
+          ->execute();               
+      }
+      $albums_fids = array();
+      $album_node = node_load($album_nid);
+      if (!empty($album_node->field_album_images['und'])) {
+        foreach ($album_node->field_album_images['und'] as $fids) {
+          $albums_fids[$fids['fid']] = $fids['fid'];
+        }      
+      } 
+      if(!in_array($node->field_design_image['und'][0]['fid'], $albums_fids)) {
+          $album_node->field_album_images['und'][] = (array)file_load($node->field_design_image['und'][0]['fid']);
+          node_save((object)$album_node);                   
+      }
+ 
+      $query = db_insert('thp_designers_albums_design')->fields(array('album_nid', 'design_nid'));
+      $query->values(array(
+          'album_nid' => $album_nid,
+          'design_nid' => $node->nid,
+        ));
+        $query->execute();  
+    }
+    field_cache_clear();
+  }
+  // Case design album
+  if ($node->type == 'design_album') {
+    foreach ($node->field_album_images['und'] as $file) {
+      $old_design_image = db_query("SELECT entity_id FROM {field_data_field_design_image} WHERE field_design_image_fid =:fid ", array(":fid" => $file['fid'])) ->fetchField();
+      if (empty($old_design_image)) {
+        $body_text = '';
+        $design_node = new stdClass();
+        $design_node->type = 'design_image';
+         node_object_prepare($design_node);
+
+        $added_file = file_load($file['fid']);
+
+        $design_node->title    = $added_file->filename;
+        $design_node->language = LANGUAGE_NONE;
+        $design_node-> status = 0;
+        $design_node->body[$design_node->language][0]['value']   = $body_text;
+        $design_node->body[$design_node->language][0]['summary'] = text_summary($body_text);
+        $design_node->body[$design_node->language][0]['format']  = 'filtered_html';
+
+        // $path = 'content/my-lipsum-' . date('YmdHis');
+        // $node->path = array('alias' => $path);
+        $added_file = file_load($file['fid']);
+        $design_node->field_design_image[LANGUAGE_NONE][0] = (array)$added_file; 
+  
+        node_save($design_node);  
+
+        $query = db_insert('thp_designers_albums_design')->fields(array('album_nid', 'design_nid'));
+        $query->values(array(
+          'album_nid' => $node->nid,
+          'design_nid' => $design_node->nid,
+        ));
+        $query->execute();
+      }
+    }
+  }
+}
+
+/**
+ *
+ */
+function thp_designers_node_view($node, $view_mode, $langcode) {
+  global $user;
+  if($node->type == 'design_image' && arg(0) == 'node') {
+    $album_nid = db_query("SELECT album_nid FROM {thp_designers_albums_design} WHERE design_nid =:nid", array(':nid' => $node->nid))->fetchAssoc();
+    $album_node = node_load($album_nid['album_nid']);
+    $node->content['design_album_name'] = array(
+      '#markup' => l($album_node->title, 'node/' . $album_node->nid),
+      '#weight' => -100,
+    );
+  }
+  if ($node->type == 'design_album' && arg(0) == 'node') {
+   drupal_add_css(drupal_get_path('theme', 'thehome_theme') . '/js/magnific-popup/magnific-popup.css');
+   drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/jquery.min.js');
+   drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/jquery-ui/js/jquery-ui-1.10.3.custom.min.js');
+   drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/magnific-popup/jquery.magnific-popup.js');
+   drupal_add_js(drupal_get_path('module', 'thp_designers') . '/thp_designers.js');
+   unset($node->content['field_album_images']);
+   $output = "";
+
+   foreach ($node->field_album_images['und'] as $file) {
+     $published = "";
+     $image_nid = db_query("SELECT entity_id FROM {field_data_field_design_image} WHERE field_design_image_fid = :fid", array(':fid' => $file['fid']))->fetchAssoc();
+     $image_node = node_load($image_nid['entity_id']);
+     if (!empty($image_nid) && $image_nid['entity_id'] != arg(1)) {
+       if ($user->uid == $image_node->uid) {
+         if ($image_node->status == 0) {
+            $published = "<span style='color: red;'> (" . t('Unpublished') . ")</span>";
+         } 
+         $output .= "<li class='image_inside_album'>" ."<a class='image_inside_album_a' href='"  . base_path() . 'node/' . $image_nid['entity_id'] . "/edit' ><p>" . t('Edit') . $published . "</p></a>" . theme('image', array('path' => $file['uri'])) . "<a class='image_inside_album_a' href='"  . base_path() . 'node/' . $image_nid['entity_id'] . "' >" . $image_node->title  . "</a></li>";
+       } else {
+        $output .= "<div class='image_inside_album'><a class='image_inside_album_a' href='"  . base_path() . 'node/' . $image_nid['entity_id'] . "' >" . theme('image', array('path' => $file['uri'])) . $image_node->title . "</a></div>";  
+     }
+    } else {
+      $output .= theme('image', array('path' => $file['uri'])); 
+   }
+
+  } 
+  if ($user->uid == $image_node->uid) {
+    $id = 'sortable_items_inside_album';
+  }
+  else {
+      $id = 'items_inside_album';
+   }
+ 
+  $node->content['albums_images_sortable'] = array (
+    '#markup' => '<ul id="' . $id . '">'. $output  .'</ul>',
+    '#weight' => 500,
+  );
+  }
+}
+
+/** 
+ *
+ */
+function thp_designers_professional_list () {
+  $output = '';
+  $output .= "<h1>" . t('Designers') . "</h1>";
+  $query = db_query('SELECT * FROM {thp_profiles_general} WHERE profile_type =:type', array(':type' => 1));
+  $result = $query->fetchAll();
+   foreach ($result as $record) {
+     $user = user_load($record->uid);
+     $output .= "<div id= 'designers_list_item'>";
+     $output .= "<div id= 'designers_list_image'>" . theme('image', array('path' => $user->picture->uri)) . "</div>";
+     $output .= "<div id= 'designers_list_name'>" . l($user->name, 'user/' . $user->uid) . "</div>";
+     $output .= "<div id= 'designers_list_bio'>" . $user->field_bio['und'][0]['safe_value'] . "</div>";
+     $output .= "</div>";
+  }
+  return $output;
+}
+
+
+/**
+ *
+ */
+function thp_designers_image_background_1() {
+  $imgname = drupal_get_path('module', 'thp_designers') . '/images/image_3.gif';
+  $destfilename = drupal_get_path('module', 'thp_designers') . '/images/image_4.gif';
+
+  $im = imagecreatefromgif($imgname);
+
+  //colors to be taken away
+  $remarr = array();
+  $remarr[] = imagecolorclosest ( $im,  153,153,102 );
+  $remarr[] = imagecolorclosest ( $im,  51,51,102 );
+  $remarr[] = imagecolorclosest ( $im,  255,0,0 );
+  $remarr[] = imagecolorclosest ( $im,  0,0,0 );
+  $remarr[] = imagecolorclosest ( $im,  1,1,1 );
+
+  //replace our colours with white
+  foreach($remarr as $remcolor) {
+    imagecolorset($im,$remcolor,255,255,255);
+  }
+  //we fill flags and colorbar with white color also
+  $white = imagecolorallocate  ( $im  , 255  , 255  , 255  );
+  imagefilledrectangle  ( $im  , 0  , 0  , 38  , 18  , $white );
+  imagefilledrectangle  ( $im  , 557  , 462  , 566  , 466  , $white );
+  imagefilledrectangle  ( $im  , 515  , 144  , 534  , 339  , $white );
+
+  //we make a new image and set white to be transparent
+  //for somereason i could not add transparent information to previous image
+  //so i had to make a new one
+  $original_image_width = imagesx( $im);
+  $original_image_height = imagesy( $im );
+  $img = imagecreatetruecolor($original_image_width,$original_image_height);
+  $trans = imagecolorallocate($img,255,255,255);
+  imagecolortransparent($img,$trans);
+
+  imagecopy($img,$im,0,0,0,0,$original_image_width,$original_image_height);
+  imagetruecolortopalette($img, true, 256);
+  imageinterlace($img);
+
+  imagegif($img,$destfilename);
+
+  imagedestroy($img);
+  imagedestroy($im);
+  return "ddd";
+}
+
+/**
+ *
+ */
+function thp_designers_image_background_2($imgname, $destfilename) {
+  //$imgname = drupal_get_path('module', 'thp_designers') . '/images/image_5.png';
+  //$destfilename = drupal_get_path('module', 'thp_designers') . '/images/image_6.png';
+
+  $im = imagecreatefrompng($imgname);
+
+  //colors to be taken away
+  $remarr = array();
+  $remarr[] = imagecolorclosest ( $im,  153,153,102 );
+  $remarr[] = imagecolorclosest ( $im,  51,51,102 );
+  $remarr[] = imagecolorclosest ( $im,  255,0,0 );
+  $remarr[] = imagecolorclosest ( $im,  0,0,0 );
+  $remarr[] = imagecolorclosest ( $im,  1,1,1 );
+
+  //replace our colours with white
+  foreach($remarr as $remcolor) {
+    imagecolorset($im,$remcolor,255,255,255);
+  }
+  //we fill flags and colorbar with white color also
+  $white = imagecolorallocate  ( $im  , 255  , 255  , 255  );
+  imagefilledrectangle  ( $im  , 0  , 0  , 38  , 18  , $white );
+  imagefilledrectangle  ( $im  , 557  , 462  , 566  , 466  , $white );
+  imagefilledrectangle  ( $im  , 515  , 144  , 534  , 339  , $white );
+
+  //we make a new image and set white to be transparent
+  //for somereason i could not add transparent information to previous image
+  //so i had to make a new one
+  $original_image_width = imagesx( $im);
+  $original_image_height = imagesy( $im );
+  $img = imagecreatetruecolor($original_image_width,$original_image_height);
+  $trans = imagecolorallocate($img,255,255,255);
+  imagecolortransparent($img,$trans);
+
+  imagecopy($img,$im,0,0,0,0,$original_image_width,$original_image_height);
+  imagetruecolortopalette($img, true, 256);
+  imageinterlace($img);
+
+  imagepng($img,$destfilename);
+
+  imagedestroy($img);
+  imagedestroy($im);
+}
+
+/**
+ *
+ */
+function thp_designers_image_background_3() {
+  $imgname = drupal_get_path('module', 'thp_designers') . '/images/image_7.jpg';
+  $destfilename = drupal_get_path('module', 'thp_designers') . '/images/image_8.png';
+
+  $im = imagecreatefromjpeg($imgname);
+
+  //colors to be taken away
+  $remarr = array();
+  $remarr[] = imagecolorclosest ( $im,  153,153,102 );
+  $remarr[] = imagecolorclosest ( $im,  51,51,102 );
+  $remarr[] = imagecolorclosest ( $im,  255,0,0 );
+  $remarr[] = imagecolorclosest ( $im,  0,0,0 );
+  $remarr[] = imagecolorclosest ( $im,  1,1,1 );
+
+  //replace our colours with white
+  foreach($remarr as $remcolor) {
+    imagecolorset($im,$remcolor,255,255,255);
+  }
+  //we fill flags and colorbar with white color also
+  $white = imagecolorallocate  ( $im  , 255  , 255  , 255  );
+  imagefilledrectangle  ( $im  , 0  , 0  , 38  , 18  , $white );
+  imagefilledrectangle  ( $im  , 557  , 462  , 566  , 466  , $white );
+  imagefilledrectangle  ( $im  , 515  , 144  , 534  , 339  , $white );
+
+  //we make a new image and set white to be transparent
+  //for somereason i could not add transparent information to previous image
+  //so i had to make a new one
+  $original_image_width = imagesx( $im);
+  $original_image_height = imagesy( $im );
+  $img = imagecreatetruecolor($original_image_width,$original_image_height);
+  $trans = imagecolorallocate($img,255,255,255);
+  imagecolortransparent($img,$trans);
+
+  imagecopy($img,$im,0,0,0,0,$original_image_width,$original_image_height);
+  imagetruecolortopalette($img, true, 256);
+  imageinterlace($img);
+
+  imagepng($img,$destfilename);
+
+  imagedestroy($img);
+  imagedestroy($im);
+  return "ddd";
+}
+
+/**
+ *
+ */
+function thp_designers_draggable() {
+  global $user;
+
+  drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/jquery-ui-1.10.2/ui/jquery-ui.js');
+  drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/jquery-ui-1.10.2/ui/jquery.ui.core.js');
+  drupal_add_css(drupal_get_path('theme', 'thehome_theme') . '/js/jquery-ui-1.10.2/themes/base/jquery-ui.css');
+  //drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/rotatable/jquery.ui.rotatable.js');
+
+  drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/jquery-ui-rotatable-master/jquery.ui.rotatable.js');
+  drupal_add_css(drupal_get_path('theme', 'thehome_theme') . '/js/jquery-ui-rotatable-master/jquery.ui.rotatable.css');
+
+  drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/html2canvas/build/html2canvas.js');
+  drupal_add_js(drupal_get_path('module', 'thp_designers') . '/thp_designers.js');
+
+////////////
+  $main_navigation_vid = variable_get('thehomepage_main_navigation_vid', '');
+  $main_terms = thp_shops_taxonomy_options_array($main_navigation_vid);
+  $right_tabs = '<ul id="nav">
+    <li><a href="#first">Rooms</a></li>
+    <li><a href="#second">My items</a></li>
+    <li><a href="#third">My boards</a></li>
+</ul> ' . l('Upload', 'node/add/design-image', array('attributes'=> array('class'=> array('upload_link')))) . '<div class="tab" id="tab-first">';
+
+  $right_tabs .= "<div id='categories_container'>";
+  foreach ($main_terms as $key => $value) {
+     $right_tabs .= "<div id='category_item_div'><a id='category_item' href='#'>";
+     $term = taxonomy_term_load($key);
+     if (!empty($term->field_main_term_image)) {
+       $right_tabs .=theme('image', array('path' => $term->field_main_term_image[LANGUAGE_NONE][0]['uri'], 'width'=> 80, 'height' => 80));
+     } else {
+       $right_tabs .=theme('image', array('path' => drupal_get_path('module', 'thp_designers') . '/images/default_cat.jpg', 'width'=> 80, 'height' => 80));
+     }
+     $right_tabs .= "<div>" .  $value . "</div></a></div>";
+  }
+ $right_tabs .= '</div>'; // Close categories container div
+ $right_tabs .= '</div>
+<div class="tab" id="tab-second">' . thp_designers_user_items($user->uid) . '</div>
+<div class="tab" id="tab-third">' . thp_designers_user_boards($user->uid) . '</div>';
+//////////////
+/*
+  $image_1 = drupal_get_path('module', 'thp_designers') . '/images/image_1.png';  
+  $image_2 = drupal_get_path('module', 'thp_designers') . '/images/image_2.png';  
+  $images  = "";
+  for($i= 50; $i< 61; $i++) {
+
+    $image_{$i} = drupal_get_path('module', 'thp_designers') . '/images/image_' . $i . '.png';
+//    $image_2 = drupal_get_path('module', 'thp_designers') . '/images/image_7.jpg';
+    
+    $images .= "<div  id='draggable_" . $i . "' class= 'draggable  ui-widget-contents' ><img   width= '100' height = '100' src='" . $image_{$i}. "' /></div>";
+   
+  }
+*/
+  $tabs = "<div id='sets_tabs' style='border: 1px solid #dddddd; border-radius: 15px; background: #f1f1f1; float: left;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    padding: 10px;'><a id = 'delete_image' href='#' >Delete </a><a id = 'clone_image' href='#' > Clone </a> <a id = 'backward_image' href='#' > Backward </a><a id = 'forward_image' href='#' > Forward </a>
+<a id = 'flip_image' href='#' > Flip </a>
+<a id = 'flop_image' href='#' > Flop </a>
+
+   </div>";
+  
+  $output = "<div id='main_draggable_div'>";
+/*
+  $output .=   "<div id='draggable_div' style='width: 450px; float: right; background: grey;'>" . $right_tabs . "<div  id='draggable_1' class= 'draggable  ui-widget-contents' ><img   width= '100' height = '100' src='" . $image_1 . "' /></div>" . "<div id='draggable_2' class= 'draggable ui-widget-contents'><img height = '100' width = '100' src='" . $image_2 . "' /></div>"  . $images . "</div>";
+*/
+  $output .=   "<div id='draggable_div' style='width: 450px; float: right; background: grey;'>" . $right_tabs . "</div>";
+  $output .= "<div id='buttons_div'>";
+  $output .= "<input id='reset_set' type='button' value='Reset'>";
+  $output .= "<input id='save_set' class = 'save_draft' type='button' value='Save Draft'>";
+  $output .= "<input id='save_set' type='submit' value='Save set'>";
+  $output .="</div>";
+  $output .=  $tabs . "<div id = 'droppable'  class='ui-widget-header ui-droppable ui-state-highlight' style='border: 1px solid #dddddd; width: 490px; height: 500px; background: white; float: left; margin-right: 10px;'>" . "</div>";
+  $output .= "</div>";
+
+  return $output;
+}
+
+function thp_designers_overlay_paths_alter(&$paths) {
+  $paths['node/add/design-image'] = TRUE;
+}
+
+/**
+ *
+ */
+function thp_designers_save_data_image() {
+  $data = $_POST['image'];
+  $set = $_POST['set'];
+
+  $img = str_replace('data:image/png;base64,', '', $data);
+  $img = str_replace(' ', '+', $img);
+  $data_2 = base64_decode($img);  
+  //$destfilename = drupal_get_path('module', 'thp_designers') . '/images/data_image.jpg';
+  $file_name = 'data_' . time() . '.png';
+  file_put_contents('sites/default/files/' . $file_name, $data_2);
+  //  return(file_put_contents('/sites/default/files/data_' . time() . '.png', $data_2));
+  print ($file_name);
+  exit();
+}
+
+/**
+ *
+ */
+function thp_designers_color_picker() {
+  include_once( 'sites/all/libraries/Colors-Of-Image/colorsofimage.class.php');
+  $output = '';
+  $image_1 = drupal_get_path('module', 'thp_designers') . '/images/image_10.png';
+  // initiate with image
+  $image = new ColorsOfImage($image_1, 2, 5);
+
+  // get the prominent colors
+  $colors = $image->getProminentColors(); // array( '#FFFDD', ... )
+  foreach ($colors as $color) {
+    $output .= "<div style='margin:10px; width: 60px; height: 60px; background-color:" . $color . "'></div>";
+  }
+  return  theme('image', array('path' =>$image_1 ,'width'=> 250, 'height' => 150)). $output;
+}
+
+
+/** 
+ *
+ */
+function thp_designers_create_set() {
+/*
+  drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/jquery-ui/js/jquery-ui-1.10.3.custom.min.js');
+  drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/jquery-ui/development-bundle/ui/jquery.ui.core.js');
+  drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/rotatable/jquery.ui.rotatable.js');
+
+  drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/html2canvas/build/html2canvas.js');
+*/
+	
+
+  drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/rotatable/js/jquery.js');
+  drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/rotatable/js/ui/jquery.ui.core.js');
+  drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/rotatable/js/ui/jquery.ui.widget.js');
+  drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/rotatable/js/ui/jquery.ui.mouse.js');
+  drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/rotatable/js/ui/jquery.ui.draggable.js');
+  drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/rotatable/js/ui/jquery.ui.resizable.js');
+  drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/rotatable/js/ui/jquery.ui.rotatable.js');
+
+
+  drupal_add_js(drupal_get_path('theme', 'thehome_theme') . '/js/html2canvas/build/html2canvas.js');
+  drupal_add_js(drupal_get_path('module', 'thp_designers') . '/thp_designers_sets.js');
+
+  drupal_add_css(drupal_get_path('theme', 'thehome_theme') . '/js/rotatable/css/jquery.ui.core.css');
+  drupal_add_css(drupal_get_path('theme', 'thehome_theme') . '/js/rotatable/css/jquery.ui.resizable.css');
+
+  $imgname = drupal_get_path('module', 'thp_designers') . '/images/image_5.png';
+  
+  $images  = "";
+  for($i= 50; $i< 61; $i++) {
+
+    $image_{$i} = drupal_get_path('module', 'thp_designers') . '/images/image_' . $i . '.png';
+//    $image_2 = drupal_get_path('module', 'thp_designers') . '/images/image_7.jpg';
+    
+    $images .= "<div  id='draggable_" . $i . "' class= 'draggable  ui-widget-contents' ><img   width= '100' height = '100' src='" . $image_{$i}. "' /></div>";
+   
+  }
+
+  $tabs = "<div id='sets_tabs' style='border: 1px solid #dddddd; border-radius: 15px; background: #f1f1f1; float: left;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    padding: 10px;'><a id = 'delete_image' href='#' >Delete </a><a id = 'clone_image' href='#' > Clone </a> <a id = 'backward_image' href='#' > Backward </a><a id = 'forward_image' href='#' > Forward </a>
+<a id = 'flip_image' href='#' > Flip </a>
+<a id = 'flop_image' href='#' > Flop </a>
+
+   </div>";
+
+  $output = "";
+  $output .= '
+	<div id="draggable-zone">
+		<div id="draggable-wrapper" style="width: 150px; height: 150px; left: 225px; top: 175px;">
+			<div id="resizable-wrapper">				
+				<img src="' .$imgname  . '" width="150" height="150" alt="" id="elem-wrapper" />
+			</div>
+		</div>
+	</div>';
+  $output .= "<div id = 'draggable-wrapper'  class='ui-widget-header ui-droppable ui-state-highlight' style='border: 1px solid #dddddd; width: 630px; height: 500px; background: white; float: left; margin-right: 10px;'>" . "<p></p></div>";
+  $output .="</div>";
+  $output .= "<input id='reset_set' type='button' value='Reset'>";
+  $output .= "<input id='save_set' type='submit' value='Save set'>";
+
+  return $output;
+}
+
+/**
+ *
+ */
+function thp_designers_user_items($uid = 0, $cat_id = 0) {
+  $output = "";
+  if ($uid != 0) {
+    $query = db_query('SELECT nid FROM {node} WHERE uid =:uid AND type=:type', array(':uid' => $uid, ':type' => "design_image"));
+  }
+  $result = $query->fetchAll();
+  foreach ($result as $record) {  
+    $node = node_load($record->nid);
+    if (!empty($node->field_transparent_image)) {    
+     $output .= "<div id ='transparent_images'><div  id='draggable_" . $node->nid . "' class= 'draggable  ui-widget-contents' >". theme('image', array('path'=> $node->field_transparent_image['und'][0]['uri'] , 'width'=> 100, 'height' => 100)) . "</div>";
+     $output .=  "<div>" . $node->title . "</div></div>";
+    }
+  }  
+  return $output;
+}
+
+/**
+ *
+ */
+function thp_designers_construct_board_edit () {
+
+  $output = "";
+  $output .= '<div style="' . $style . '" id="draggable_' . $nid . '" class="draggable  ui-widget-contents ui-draggable copied">';
+ 
+   
+  $output .= '</div>';
+  return $output;
+}
+
+/**
+ *
+ */
+function thp_designers_user_boards($uid) {
+  $output = "";
+  if ($uid != 0) {
+    $query = db_query('SELECT nid FROM {node} INNER JOIN {thp_designers_sets_data} USING (nid) WHERE uid =:uid AND type=:type ', array(':uid' => $uid, ':type' => "design_image"));
+  }
+  $result = $query->fetchAll();
+  foreach ($result as $record) {  
+    $node = node_load($record->nid);
+    if (!empty($node->field_transparent_image)) {    
+     $output .= "<div id ='transparent_images'><div  id='draggable_" . $node->nid . "' class= 'draggable  ui-widget-contents' >". theme('image', array('path'=> $node->field_transparent_image['und'][0]['uri'] , 'width'=> 100, 'height' => 100)) . "</div>";
+     $output .=  "<div>" . $node->title . "</div></div>";
+    }
+  }  
+  return $output;
+}

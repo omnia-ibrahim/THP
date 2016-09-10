@@ -1,0 +1,326 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function thp_profiles_install() {
+  // Profile speciality
+  $vocabulary = new stdClass();
+  $vocabulary->name = 'Speciality';
+  $vocabulary->description = 'Speciality';
+  $vocabulary->machine_name = 'profile_speciality';
+  taxonomy_vocabulary_save($vocabulary);
+  $vid = $vocabulary->vid;
+  variable_set('thehomepage_profile_speciality_vid', $vid);
+
+  // Profile style
+  $vocabulary = new stdClass();
+  $vocabulary->name = 'Style';
+  $vocabulary->description = 'Style';
+  $vocabulary->machine_name = 'profile_style';
+  taxonomy_vocabulary_save($vocabulary);
+  $vid = $vocabulary->vid;
+  variable_set('thehomepage_profile_style_vid', $vid);
+
+  // Designer experience
+  $vocabulary = new stdClass();
+  $vocabulary->name = 'Experience';
+  $vocabulary->description = 'Designer experience';
+  $vocabulary->machine_name = 'designer_experience';
+  taxonomy_vocabulary_save($vocabulary);
+  $vid = $vocabulary->vid;
+  variable_set('thehomepage_designer_experience_vid', $vid);
+
+  // Designer title
+  $vocabulary = new stdClass();
+  $vocabulary->name = 'Title';
+  $vocabulary->description = 'Designer Title';
+  $vocabulary->machine_name = 'designer_title';
+  taxonomy_vocabulary_save($vocabulary);
+  $vid = $vocabulary->vid;
+  variable_set('thehomepage_designer_title_vid', $vid);
+
+  // Designer services
+  $vocabulary = new stdClass();
+  $vocabulary->name = 'Services';
+  $vocabulary->description = 'Designer Services';
+  $vocabulary->machine_name = 'designer_services';
+  taxonomy_vocabulary_save($vocabulary);
+  $vid = $vocabulary->vid;
+  variable_set('thehomepage_designer_services_vid', $vid);
+
+  // Designer Professional availability
+  $vocabulary = new stdClass();
+  $vocabulary->name = 'Professional availability';
+  $vocabulary->description = 'professional availability';
+  $vocabulary->machine_name = 'designer_availability';
+  taxonomy_vocabulary_save($vocabulary);
+  $vid = $vocabulary->vid;
+  variable_set('thehomepage_designer_availability_vid', $vid);
+
+} 
+
+/**
+ *
+ */
+function thp_profiles_update_1 () {
+  // General table
+  $schema['thp_profiles_general'] = array(
+    'description' => t('Main profile fields'),
+    'fields' => array(      
+      'uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The user uid.',
+      ),
+       'profile_type' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0, 
+        'description' => 'Profile type: 0=> normal, 1=> designer, 2=> shop.',
+      ),
+      'premium' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Flag 0=> free, 1=> premium.',
+      ),
+      'speciality' => array(
+        'type' => 'varchar',
+        'default' => '',
+        'length' => '512',
+        'description' => 'Shop and designer speciality.',
+      ),
+      'website' => array(
+        'type' => 'varchar',
+        'length' => '512',
+        'default' => '',
+        'description' => 'Profile website.',
+      ),
+      'fb_account' => array(
+        'type' => 'varchar',
+        'default' => '',
+        'length' => '512',
+        'description' => 'Profile fb account.',
+      ),
+      'twitter_account' => array(
+        'type' => 'varchar',
+        'length' => '512',
+        'default' => '',
+        'description' => 'Profile twitter account.',
+      ),
+      'phone' => array(
+        'type' => 'varchar',
+        'length' => '512',
+        'default' => '',
+        'description' => 'Phone number.',
+      ),
+      'profile_address' => array(
+        'type' => 'varchar',
+        'length' => '512',
+        'default' => '',
+        'description' => 'Profile address.',
+      ),
+    ),
+    'primary key' => array('uid'),
+    'indexes' => array('profile_type' => array('profile_type')),
+  );
+  db_create_table('thp_profiles_general', $schema['thp_profiles_general']);
+}
+
+
+/**
+ *
+ */
+function thp_profiles_update_2 () {
+  // Designers profile table
+  $schema['thp_profiles_designer'] = array(
+    'description' => t('Designer profile fields'),
+    'fields' => array(      
+      'uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The user uid.',
+      ),
+       'experience' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0, 
+        'description' => 'From vocab, single value.',
+      ),
+      'designer_title' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'From vocab, single value.',
+      ),
+      'designer_services' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'From vocab, multiple values, comma seprated.',
+      ),
+      'professional_availability' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'From vocab, single value.',
+      ),
+    ),
+    'primary key' => array('uid'),
+  );
+  db_create_table('thp_profiles_designer', $schema['thp_profiles_designer']);
+}
+
+/**
+ *
+ */
+function thp_profiles_update_3 () {
+  // Shops General table 
+  $schema['thp_profiles_general_shops'] = array(
+    'description' => t('Main profile fields'),
+    'fields' => array(      
+      'uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The user uid.',
+      ),
+       'shop_type' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0, 
+        'description' => 'Profile type: 0=> boutique, 1=> eshop, 2=> showroom.',
+      ),
+      'online_offline' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Flag 0=> offline, 1=> online.',
+      ),
+      'contact_person_name' => array(
+        'type' => 'varchar',
+        'length' => '512',
+        'not null' => TRUE,
+        'description' => 'Contact person name.',
+      ),
+      'contact_person_email' => array(
+        'type' => 'varchar',
+        'length' => '512',
+        'not null' => TRUE,
+        'description' => 'Contact person email.',
+      ),
+      'contact_person_phone' => array(
+        'type' => 'varchar',
+        'length' => '512',
+        'not null' => TRUE,
+        'description' => 'Contact person phone.',
+      ),
+      'contact_person_title' => array(
+        'type' => 'varchar',
+        'length' => '512',
+        'not null' => TRUE,
+        'description' => 'Contact person title.',
+      ),
+    ),
+    'primary key' => array('uid'),
+    'indexes' => array('shop_type' => array('shop_type')),
+  );
+  db_create_table('thp_profiles_general_shops', $schema['thp_profiles_general_shops']);
+}
+
+
+/**
+ *
+ */
+function thp_profiles_update_4 () {
+  // Online Shops table 
+  $schema['thp_profiles_online_shops'] = array(
+    'description' => t('Main online shops fields'),
+    'fields' => array(      
+      'uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The user uid.',
+      ),
+       'currency' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0, 
+        'description' => 'Currency: 0=> EGP, 1=> USD.',
+      ),
+      'payment' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Flag 0=> COD, 1=> Paypal, 2=> Credit card.',
+      ),
+      'shipping_time' => array(
+        'type' => 'varchar',
+        'length' => '512',
+        'not null' => TRUE,
+        'description' => 'Shipping time range.',
+      ),
+      'shipping_rate' => array(
+        'type' => 'varchar',
+        'length' => '512',
+        'not null' => TRUE,
+        'description' => 'Shipping fees rate.',
+      ),
+    ),
+    'primary key' => array('uid'),   
+  );
+  db_create_table('thp_profiles_online_shops', $schema['thp_profiles_online_shops']);
+}
+
+/**
+ * Add follow database for users
+ */
+function thp_profiles_update_5 () {
+  // General table
+  $schema['thp_profiles_follow'] = array(
+    'description' => t('Follow users fields'),
+    'fields' => array(      
+      'uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The user uid.',
+      ),
+       'follower_uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0, 
+        'description' => 'Profile type: 0=> normal, 1=> designer, 2=> shop.',
+      ),
+      'follow_time' => array(
+        'type' => 'varchar',
+        'default' => '',
+        'length' => '512',
+        'description' => 'Shop and designer speciality.',
+      ),
+    ),
+    'indexes' => array('uid_follower' => array('uid', 'follower_uid')),
+  );
+  db_create_table('thp_profiles_follow', $schema['thp_profiles_follow']);
+}
+
